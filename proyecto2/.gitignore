@@ -1,0 +1,23 @@
+# Ignorar el entorno virtual
+venv/
+
+# Ignorar archivos de caché de Python
+__pycache__/
+*.pyc
+
+# Ignorar la base de datos SQLite (si la usas)
+*.sqlite3
+
+# Ignorar archivos estáticos y media (si los tienes)
+/static
+/media
+
+# Ignorar archivos de log
+*.log
+
+# Ignorar archivos de intercambio de editores de texto
+*.swp
+
+# Ignorar archivos específicos del sistema operativo (opcional)
+.DS_Store # macOS
+Thumbs.db # Windows
