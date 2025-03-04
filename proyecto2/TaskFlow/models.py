@@ -2,13 +2,14 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 
+
+    
 class Usuario(AbstractUser):
     ROLES = (
         ('admin', 'Administrador'),
         ('member', 'Miembro'),
         ('guest', 'Invitado'),
     )
-    # Este campo se puede mantener para una asignación directa, o bien usar el modelo Rol
     rol = models.CharField(max_length=20, choices=ROLES, default='member')
 
     def __str__(self):
@@ -59,7 +60,14 @@ class Grupo(models.Model):
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True, null=True)
     usuarios = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='grupos')
-    
+    proyecto = models.ForeignKey(
+        'Proyecto',
+        on_delete=models.CASCADE,
+        related_name='grupos',
+        null=True,  # Permite nulos
+        blank=True  # Permite formularios sin este campo
+    )
+
     def __str__(self):
         return self.nombre
 
