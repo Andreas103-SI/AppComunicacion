@@ -36,3 +36,4 @@ class ProyectoCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Proyecto
     fields = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'usuarios']
     template_name = 'proyecto_form.html'
+
