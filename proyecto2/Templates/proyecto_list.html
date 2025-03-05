@@ -1,0 +1,9 @@
+<h1>Lista de Proyectos</h1>
+<ul>
+    {% for proyecto in object_list %}
+        <li>{{ proyecto.nombre }} - {{ proyecto.descripcion }}</li>
+    {% endfor %}
+</ul>
+{% if user.rol == 'admin' %}
+    <a href="{% url 'proyecto_create' %}">Crear Proyecto</a>
+{% endif %}

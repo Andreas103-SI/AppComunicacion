@@ -17,13 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
-from TaskFlow.views import home_view  # Ajusta el nombre según tu archivo
+from TaskFlow.views import home_view
+from TaskFlow.views import CustomLoginView, CustomLogoutView, RegistroView
+from TaskFlow.views import ProyectoListView, ProyectoCreateView
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
-    
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
+    path('registro/', RegistroView.as_view(), name='registro'),
+    path('proyectos/', ProyectoListView.as_view(), name='proyecto_list'),
+    path('proyectos/crear/', ProyectoCreateView.as_view(), name='proyecto_create'),
+
+
 ]
 
 
