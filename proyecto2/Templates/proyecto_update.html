@@ -1,0 +1,10 @@
+{% extends 'base.html' %} <!-- Si tienes un template base, úsalo -->
+{% block content %}
+<h1>Editar Proyecto</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Guardar Cambios</button>
+    <a href="{% url 'proyectos' %}">Cancelar</a>
+</form>
+{% endblock %}
