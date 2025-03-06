@@ -27,7 +27,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'django-insecure-$3diuickol8z-diwz#5b%ltd%c*g$*7z8g%ytqjq8#xp(v^$o&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -138,7 +138,6 @@ AUTH_USER_MODEL = 'TaskFlow.Usuario'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
-
 LOGIN_URL = '/login/'
-
+LOGIN_REDIRECT_URL = '/proyectos/'
 

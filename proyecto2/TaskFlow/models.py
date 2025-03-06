@@ -15,6 +15,7 @@ class Usuario(AbstractUser):
     def __str__(self):
         return self.username
 
+        
 class Rol(models.Model):
     nombre = models.CharField(max_length=50, unique=True)
     descripcion = models.TextField(blank=True, null=True)
