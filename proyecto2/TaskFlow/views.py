@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
 from .models import Proyecto
 from .forms import RegistroForm, ProyectoForm
 from .mixins import AdminRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 def home_view(request):
     return render(request, "home.html")
@@ -38,6 +39,10 @@ class ProyectoUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     template_name = 'proyecto_update.html'  # Nueva plantilla para edición
     success_url = '/proyectos/'  # Redirige a la lista tras actualizar
 
+class ProyectoDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
+    model = Proyecto
+    success_url = reverse_lazy('proyectos')
+    template_name = 'proyectos/proyecto_confirm_delete.html'
+
     def get_queryset(self):
-        # Restringe la edición solo a los proyectos que el usuario puede modificar
-        return Proyecto.objects.all()  # Ajusta esto si quieres más restricciones (por ejemplo, solo proyectos del usuario)
+        return Proyecto.objects.all()
