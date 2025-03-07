@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+import datetime
 
 
     
@@ -46,17 +47,20 @@ class Tarea(models.Model):
         ('en_progreso', 'En Progreso'),
         ('completada', 'Completada'),
     )
-    
+
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='tareas')
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField()
     fecha_limite = models.DateField()
+    fecha_vencimiento = models.DateField(default=datetime.date.today) #Se agrego este campo
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='tareas')
     usuarios_asignados = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='tareas')
-    
+    asignado_a = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True) #Se agrego este campo
+
     def __str__(self):
         return self.nombre
 
+        
 class Grupo(models.Model):
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True, null=True)
@@ -129,3 +133,4 @@ class Notificacion(models.Model):
     def __str__(self):
         estado = "Leída" if self.leida else "No leída"
         return f"Notificación para {self.usuario} - {estado}"
+

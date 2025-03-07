@@ -3,11 +3,14 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView
-from .models import Proyecto
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView #Agrega DetailView a la lista de importaciones.
+from .models import Proyecto, Tarea  # Importa Tarea
 from .forms import RegistroForm, ProyectoForm
 from .mixins import AdminRequiredMixin
-from django.contrib.auth.mixins import LoginRequiredMixin
+from .forms import TareaForm
+from django.http import Http404
+from django.shortcuts import render
+
 
 def home_view(request):
     return render(request, "home.html")
@@ -36,8 +39,8 @@ class ProyectoCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
 class ProyectoUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Proyecto
     form_class = ProyectoForm
-    template_name = 'proyecto_update.html'  # Nueva plantilla para edición
-    success_url = '/proyectos/'  # Redirige a la lista tras actualizar
+    template_name = 'proyecto_update.html'
+    success_url = '/proyectos/'
 
 class ProyectoDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
     model = Proyecto
@@ -46,3 +49,58 @@ class ProyectoDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
 
     def get_queryset(self):
         return Proyecto.objects.all()
+
+class TareaListView(LoginRequiredMixin, ListView):
+    model = Tarea
+    template_name = 'tareas/tarea_list.html'
+    context_object_name = 'tareas'
+
+    def get_queryset(self):
+        return Tarea.objects.filter(proyecto__usuarios=self.request.user)
+
+class TareaCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
+    model = Tarea
+    form_class = TareaForm
+    template_name = 'tareas/tarea_form.html'
+
+    def form_valid(self, form):
+        form.instance.proyecto = Proyecto.objects.get(id=self.kwargs['proyecto_id'])
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('proyecto_detalle', kwargs={'pk': self.kwargs['proyecto_id']})
+
+class TareaUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
+    model = Tarea
+    form_class = TareaForm
+    template_name = 'tareas/tarea_form.html'
+
+    def get_success_url(self):
+        return reverse_lazy('proyecto_detalle', kwargs={'pk': self.object.proyecto.id})
+
+class TareaDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
+    model = Tarea
+    template_name = 'tareas/tarea_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('proyecto_detalle', kwargs={'pk': self.object.proyecto.id})
+
+
+class ProyectoDetailView(LoginRequiredMixin, DetailView):
+    model = Proyecto
+    template_name = 'proyectos/proyecto_detail.html'
+    context_object_name = 'proyecto'
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Proyecto.objects.all()
+        return Proyecto.objects.filter(usuarios=self.request.user)
+
+    def handle_no_permission(self):
+        return render(self.request, 'proyectos/no_permission.html', {'message': 'No tienes permiso para acceder a la información de este proyecto.'})
+
+    def get(self, request, *args, **kwargs):
+        try:
+            return super().get(request, *args, **kwargs)
+        except Http404:
+            return self.handle_no_permission()

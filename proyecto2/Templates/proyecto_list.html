@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}Lista de Proyectos{% endblock %}
 {% block content %}
 <h1>Lista de Proyectos</h1>
 <ul>
     {% for proyecto in object_list %}
     <li>
-        {{ proyecto.nombre }} - {{ proyecto.descripcion }}
+        <a href="{% url 'proyecto_detalle' proyecto.id %}">{{ proyecto.nombre }}</a> - {{ proyecto.descripcion }}
         {% if user.is_staff or user.is_superuser %}
             <a href="{% url 'proyectos_editar' proyecto.id %}">Editar</a>
             <a href="{% url 'proyectos_eliminar' proyecto.id %}">Eliminar</a>
@@ -15,7 +14,7 @@
     <li>No hay proyectos aún.</li>
     {% endfor %}
 </ul>
-{% if user.is_staff or user.is_superuser %}<!-- asegura que solo los administradores vean las opciones de edición y eliminación. -->
+{% if user.is_staff or user.is_superuser %}
     <a href="{% url 'proyectos_crear' %}">Crear Proyecto</a>
 {% endif %}
 {% endblock %}
