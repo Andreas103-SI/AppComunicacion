@@ -5,7 +5,7 @@
     {% for proyecto in object_list %}
     <li>
         {{ proyecto.nombre }} - {{ proyecto.descripcion }}
-        {% if user.is_staff or user.is_superuser %} <!-- Solo administradores ven el enlace -->
+        {% if user.is_staff or user.is_superuser %}
             <a href="{% url 'proyectos_editar' proyecto.id %}">Editar</a>
         {% endif %}
     </li>

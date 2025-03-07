@@ -27,4 +27,3 @@ urlpatterns = [
     path('registro/', RegistroView.as_view(), name='registro'),
     path('', include('TaskFlow.urls')),
 ]
-
