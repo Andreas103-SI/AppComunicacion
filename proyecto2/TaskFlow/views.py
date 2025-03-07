@@ -10,6 +10,9 @@ from .mixins import AdminRequiredMixin
 from .forms import TareaForm
 from django.http import Http404
 from django.shortcuts import render
+from .models import Mensaje
+
+
 
 
 def home_view(request):
@@ -104,3 +107,11 @@ class ProyectoDetailView(LoginRequiredMixin, DetailView):
             return super().get(request, *args, **kwargs)
         except Http404:
             return self.handle_no_permission()
+
+
+class MensajeListView(LoginRequiredMixin, ListView):
+    model = Mensaje
+    template_name = 'mensajes/mensaje_list.html'
+
+    def get_queryset(self):
+        return Mensaje.objects.filter(destinatario=self.request.user).order_by('-fecha')
