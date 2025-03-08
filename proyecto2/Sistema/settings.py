@@ -57,10 +57,10 @@ ROOT_URLCONF = 'Sistema.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Asegúrate de que esta línea incluya la carpeta 'templates'
+        'DIRS': [BASE_DIR / 'templates'],  # Esto apunta a la carpeta templates del proyecto
         'APP_DIRS': True,
         'OPTIONS': {
-            'context_processors': [
+                'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',

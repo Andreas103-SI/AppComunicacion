@@ -31,18 +31,18 @@ class RegistroView(CreateView):
 
 class ProyectoListView(LoginRequiredMixin, ListView):
     model = Proyecto
-    template_name = 'proyecto_list.html'
+    template_name = 'proyectos/proyecto_list.html'
 
 class ProyectoCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Proyecto
     form_class = ProyectoForm
-    template_name = 'proyecto_form.html'
+    template_name = 'proyectos/proyecto_form.html'
     success_url = '/proyectos/'
 
 class ProyectoUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Proyecto
     form_class = ProyectoForm
-    template_name = 'proyecto_update.html'
+    template_name = 'proyectos/proyecto_update.html'
     success_url = '/proyectos/'
 
 class ProyectoDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
