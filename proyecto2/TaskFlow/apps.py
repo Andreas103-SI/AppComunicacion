@@ -6,3 +6,7 @@ class TaskflowConfig(AppConfig):
 
     def ready(self):
         import TaskFlow.signals  # Esto activa los signals de la aplicación
+        
+        
+
+
