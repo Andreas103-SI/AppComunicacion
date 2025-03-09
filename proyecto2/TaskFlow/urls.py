@@ -22,4 +22,6 @@ urlpatterns = [
     path('tareas/<int:tarea_id>/comentarios/crear/', ComentarioCreateView.as_view(), name='comentario_crear'),
     path('notificaciones/', NotificacionesView.as_view(), name='notificaciones'),
     path('notificaciones/<int:notificacion_id>/marcar-leida/', marcar_notificacion_leida, name='marcar_notificacion_leida'),
+    path('proyectos/<int:proyecto_id>/', TareaListView.as_view(), name='proyecto_detalle'),
+    
 ]

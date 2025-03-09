@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView #Agrega DetailView a la lista de importaciones.
 from .models import Proyecto, Tarea, Comentario
 from .forms import RegistroForm, ProyectoForm, ComentarioForm
@@ -14,8 +13,7 @@ from .models import Mensaje
 from .models import Notificacion
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-
-
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 
@@ -64,8 +62,11 @@ class TareaListView(LoginRequiredMixin, ListView):
     context_object_name = 'tareas'
 
     def get_queryset(self):
-        return Tarea.objects.filter(proyecto__usuarios=self.request.user)
-
+        proyecto_id = self.kwargs.get('proyecto_id')
+        if proyecto_id:
+            return Tarea.objects.filter(proyecto_id=proyecto_id)
+        return Tarea.objects.none()  # Devuelve vacío si no hay proyecto_id
+        
 class TareaCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Tarea
     form_class = TareaForm

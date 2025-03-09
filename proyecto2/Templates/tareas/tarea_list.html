@@ -11,10 +11,11 @@
         {% endif %}
     </li>
     {% empty %}
-    <li>No hay tareas.</li>
+    <li>No hay tareas para este proyecto.</li>
     {% endfor %}
 </ul>
 {% if user.is_staff or user.is_superuser %}
-    <a href="{% url 'tarea_crear' proyecto_id=1 %}">Crear Tarea</a> <!-- Ajusta proyecto_id según el proyecto -->
+    <a href="{% url 'tarea_crear' proyecto_id=proyecto_id %}">Crear Tarea</a>
 {% endif %}
+<a href="{% url 'proyectos_list' %}">Volver a Proyectos</a>
 {% endblock %}
