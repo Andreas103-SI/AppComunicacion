@@ -11,6 +11,10 @@ from .forms import TareaForm
 from django.http import Http404
 from django.shortcuts import render
 from .models import Mensaje
+from .models import Notificacion
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+
 
 
 
@@ -132,3 +136,24 @@ class ComentarioCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('proyecto_detalle', kwargs={'pk': self.object.tarea.proyecto.id})
     
     
+class NotificacionesView(LoginRequiredMixin, ListView):
+    model = Notificacion
+    template_name = 'notificaciones/notificaciones.html'
+    context_object_name = 'notificaciones'
+
+    def get_queryset(self):
+        # Solo mostrar notificaciones no leídas del usuario actual
+        return Notificacion.objects.filter(
+            usuario=self.request.user,
+            leida=False
+        ).order_by('-fecha')
+        
+
+@login_required
+def marcar_notificacion_leida(request, notificacion_id):
+    notificacion = get_object_or_404(Notificacion, id=notificacion_id, usuario=request.user)
+    if request.method == "POST":
+        notificacion.leida = True
+        notificacion.save()
+    # Después de marcarla como leída, redirige a la vista de notificaciones
+    return redirect('notificaciones')

@@ -4,6 +4,7 @@ from .views import ProyectoListView, ProyectoCreateView, ProyectoUpdateView, Pro
 from .views import TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView
 from .views import home_view, ProyectoListView
 from .views import MensajeListView, ComentarioCreateView
+from .views import NotificacionesView, marcar_notificacion_leida
 
 
 
@@ -19,4 +20,6 @@ urlpatterns = [
     path('proyectos/<int:pk>/', ProyectoDetailView.as_view(), name='proyecto_detalle'),
     path('mensajes/', MensajeListView.as_view(), name='mensajes'),
     path('tareas/<int:tarea_id>/comentarios/crear/', ComentarioCreateView.as_view(), name='comentario_crear'),
+    path('notificaciones/', NotificacionesView.as_view(), name='notificaciones'),
+    path('notificaciones/<int:notificacion_id>/marcar-leida/', marcar_notificacion_leida, name='marcar_notificacion_leida'),
 ]

@@ -57,19 +57,19 @@ ROOT_URLCONF = 'Sistema.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Esto apunta a la carpeta templates del proyecto
+        'DIRS': [BASE_DIR / 'templates'],  # Esto está bien, no lo cambies
         'APP_DIRS': True,
         'OPTIONS': {
-                'context_processors': [
+            'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'TaskFlow.context_processors.notificaciones_no_leidas',  # Añade esto
             ],
         },
     },
 ]
-
 
 WSGI_APPLICATION = 'Sistema.wsgi.application'
 

@@ -1,0 +1,20 @@
+{% extends "base.html" %}  <!-- Ajusta según tu plantilla base -->
+
+{% block content %}
+  <h2>Mis Notificaciones</h2>
+  {% if notificaciones %}
+    <ul>
+      {% for notificacion in notificaciones %}
+        <li>
+          {{ notificacion.mensaje }} - {{ notificacion.fecha|date:"d/m/Y H:i" }}
+          <form method="post" action="{% url 'marcar_notificacion_leida' notificacion.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Marcar como leída</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No tienes notificaciones no leídas.</p>
+  {% endif %}
+{% endblock %}
