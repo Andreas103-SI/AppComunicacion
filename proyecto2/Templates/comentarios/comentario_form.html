@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Agregar Comentario</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Enviar</button>
+</form>
+<a href="{% url 'proyecto_detalle' proyecto_id=tarea.proyecto.id %}">Volver</a>
+{% endblock %}

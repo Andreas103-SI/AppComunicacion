@@ -3,7 +3,7 @@ from . import views
 from .views import ProyectoListView, ProyectoCreateView, ProyectoUpdateView, ProyectoDeleteView, ProyectoDetailView
 from .views import TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView
 from .views import home_view, ProyectoListView
-from .views import MensajeListView
+from .views import MensajeListView, ComentarioCreateView
 
 
 
@@ -18,4 +18,5 @@ urlpatterns = [
     path('tareas/eliminar/<int:pk>/', TareaDeleteView.as_view(), name='tarea_eliminar'),
     path('proyectos/<int:pk>/', ProyectoDetailView.as_view(), name='proyecto_detalle'),
     path('mensajes/', MensajeListView.as_view(), name='mensajes'),
+    path('tareas/<int:tarea_id>/comentarios/crear/', ComentarioCreateView.as_view(), name='comentario_crear'),
 ]

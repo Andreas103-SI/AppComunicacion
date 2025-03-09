@@ -51,8 +51,7 @@ class Tarea(models.Model):
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='tareas')
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField()
-    fecha_limite = models.DateField()
-    fecha_vencimiento = models.DateField(default=datetime.date.today) #Se agrego este campo
+    fecha_limite = models.DateField(default=datetime.date.today)    
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     usuarios_asignados = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='tareas')
     asignado_a = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True) #Se agrego este campo

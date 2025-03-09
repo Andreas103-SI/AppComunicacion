@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from .models import Proyecto
 from .models import Tarea
+from .models import Comentario
 
 User = get_user_model()
 
@@ -24,9 +25,10 @@ class ProyectoForm(forms.ModelForm):
 class TareaForm(forms.ModelForm):
     class Meta:
         model = Tarea
-        fields = ['nombre', 'descripcion', 'fecha_limite', 'fecha_vencimiento', 'estado', 'usuarios_asignados', 'asignado_a']
-        widgets = {
-            'usuarios_asignados': forms.SelectMultiple(),
-            'fecha_limite': forms.DateInput(attrs={'type': 'date'}),
-            'fecha_vencimiento': forms.DateInput(attrs={'type': 'date'}),
-        }
+        fields = ['nombre', 'descripcion', 'fecha_limite', 'estado', 'usuarios_asignados', 'asignado_a']
+                        
+# Formulario para crear comentarios
+class ComentarioForm(forms.ModelForm):
+    class Meta:
+        model = Comentario
+        fields = ['contenido']

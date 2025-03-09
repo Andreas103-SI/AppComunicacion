@@ -4,13 +4,14 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView #Agrega DetailView a la lista de importaciones.
-from .models import Proyecto, Tarea  # Importa Tarea
-from .forms import RegistroForm, ProyectoForm
+from .models import Proyecto, Tarea, Comentario
+from .forms import RegistroForm, ProyectoForm, ComentarioForm
 from .mixins import AdminRequiredMixin
 from .forms import TareaForm
 from django.http import Http404
 from django.shortcuts import render
 from .models import Mensaje
+
 
 
 
@@ -115,3 +116,19 @@ class MensajeListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Mensaje.objects.filter(destinatario=self.request.user).order_by('-fecha')
+    
+    
+class ComentarioCreateView(LoginRequiredMixin, CreateView):
+    model = Comentario
+    form_class = ComentarioForm
+    template_name = 'comentarios/comentario_form.html'
+
+    def form_valid(self, form):
+        form.instance.tarea = Tarea.objects.get(id=self.kwargs['tarea_id'])
+        form.instance.usuario = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('proyecto_detalle', kwargs={'pk': self.object.tarea.proyecto.id})
+    
+    
