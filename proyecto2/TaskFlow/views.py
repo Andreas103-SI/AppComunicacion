@@ -66,6 +66,11 @@ class TareaListView(LoginRequiredMixin, ListView):
         if proyecto_id:
             return Tarea.objects.filter(proyecto_id=proyecto_id)
         return Tarea.objects.none()  # Devuelve vacío si no hay proyecto_id
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['proyecto_id'] = self.kwargs.get('proyecto_id')
+        return context
         
 class TareaCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Tarea
