@@ -14,7 +14,7 @@ from .models import Notificacion
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.db import models
 
 
 
@@ -56,6 +56,8 @@ class ProyectoDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
     def get_queryset(self):
         return Proyecto.objects.all()
 
+
+
 class TareaListView(LoginRequiredMixin, ListView):
     model = Tarea
     template_name = 'tareas/tarea_list.html'
@@ -63,15 +65,31 @@ class TareaListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         proyecto_id = self.kwargs.get('proyecto_id')
+        print(f"Proyecto ID: {proyecto_id}")  # Depuración
         if proyecto_id:
-            return Tarea.objects.filter(proyecto_id=proyecto_id)
-        return Tarea.objects.none()  # Devuelve vacío si no hay proyecto_id
-    
+            # Si es administrador, muestra todas las tareas del proyecto
+            if self.request.user.is_superuser or self.request.user.is_staff:
+                tareas = Tarea.objects.filter(proyecto_id=proyecto_id)
+            else:
+                # Para usuarios normales, muestra solo las tareas asignadas a ellos
+                tareas = Tarea.objects.filter(
+                    proyecto_id=proyecto_id
+                ).filter(
+                    models.Q(asignado_a=self.request.user) |
+                    models.Q(usuarios_asignados=self.request.user)
+                )
+            print(f"Tareas encontradas: {list(tareas)}")  # Depuración
+            return tareas
+        return Tarea.objects.none()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['proyecto_id'] = self.kwargs.get('proyecto_id')
+        proyecto_id = self.kwargs.get('proyecto_id')
+        context['proyecto_id'] = proyecto_id
+        context['proyecto'] = Proyecto.objects.get(id=proyecto_id)
         return context
-        
+
+
 class TareaCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Tarea
     form_class = TareaForm
@@ -142,13 +160,16 @@ class ComentarioCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('proyecto_detalle', kwargs={'pk': self.object.tarea.proyecto.id})
     
     
+
+
 class NotificacionesView(LoginRequiredMixin, ListView):
     model = Notificacion
     template_name = 'notificaciones/notificaciones.html'
     context_object_name = 'notificaciones'
 
     def get_queryset(self):
-        # Solo mostrar notificaciones no leídas del usuario actual
+        if self.request.user.is_superuser:
+            return Notificacion.objects.filter(leida=False).order_by('-fecha')
         return Notificacion.objects.filter(
             usuario=self.request.user,
             leida=False

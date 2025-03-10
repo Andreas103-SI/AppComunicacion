@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Tareas del Proyecto {{ proyecto_id }}</h1>
+<h1>{{ proyecto.nombre }}</h1>
+<p>{{ proyecto.descripcion }}</p>
+<h2>Tareas</h2>
 <ul>
-    {% for tarea in tareas %}
+    {% for tarea in object_list %}
     <li>
         {{ tarea.nombre }} - {{ tarea.estado }}
         {% if user.is_staff or user.is_superuser %}
@@ -17,5 +19,5 @@
 {% if user.is_staff or user.is_superuser %}
     <a href="{% url 'tarea_crear' proyecto_id=proyecto_id %}">Crear Tarea</a>
 {% endif %}
-<a href="{% url 'proyectos_list' %}">Volver a Proyectos</a>
+<a href="{% url 'proyectos' %}">Volver a Proyectos</a>
 {% endblock %}
