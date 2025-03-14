@@ -54,31 +54,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'Sistema.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Esto está bien, no lo cambies
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'TaskFlow.context_processors.notificaciones_no_leidas',  # Añade esto
-            ],
-        },
-    },
-]
-
 WSGI_APPLICATION = 'Sistema.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'SystemCom',
         'USER': 'postgres',
         'PASSWORD': 'andre103',
@@ -87,6 +71,26 @@ DATABASES = {
     }
 }
 
+# Sessions
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+# Templates
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'TaskFlow.context_processors.notificaciones_no_leidas',
+            ],
+        },
+    },
+]
 
 
 
@@ -134,8 +138,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'TaskFlow.Usuario'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, 'static'),  # Esto buscará los archivos estáticos en la raíz
 ]
+
+
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/proyectos/'
 
