@@ -6,6 +6,7 @@
 <ul>
     {% for tarea in object_list %}
     <li>
+        
         {{ tarea.nombre }} - {{ tarea.estado }}
         {% if user.is_staff or user.is_superuser %}
             <a href="{% url 'tarea_editar' tarea.id %}">Editar</a>

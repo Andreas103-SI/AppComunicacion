@@ -54,11 +54,10 @@ class Tarea(models.Model):
     fecha_limite = models.DateField(default=datetime.date.today)    
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     usuarios_asignados = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='tareas')
-    asignado_a = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True) #Se agrego este campo
+    asignado_a = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.nombre
-
         
 class Grupo(models.Model):
     nombre = models.CharField(max_length=255)

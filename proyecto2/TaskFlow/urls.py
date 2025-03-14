@@ -18,6 +18,7 @@ urlpatterns = [
     path('proyectos/<int:pk>/', ProyectoDetailView.as_view(), name='proyecto_detalle'),
     
     # Tareas
+    path('tareas/', TareaListView.as_view(), name='tareas'),
     path('proyectos/<int:proyecto_id>/tareas/', TareaListView.as_view(), name='tareas_proyecto'),
     path('proyectos/<int:proyecto_id>/tareas/crear/', TareaCreateView.as_view(), name='tarea_crear'),
     path('tareas/<int:pk>/editar/', TareaUpdateView.as_view(), name='tarea_editar'),

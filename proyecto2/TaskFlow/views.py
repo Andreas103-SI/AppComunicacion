@@ -64,6 +64,7 @@ class TareaListView(LoginRequiredMixin, ListView):
     context_object_name = 'tareas'
 
     def get_queryset(self):
+        print('queryset')
         proyecto_id = self.kwargs.get('proyecto_id')
         print(f"Proyecto ID: {proyecto_id}")  # Depuración
         if proyecto_id:
@@ -94,13 +95,17 @@ class TareaCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Tarea
     form_class = TareaForm
     template_name = 'tareas/tarea_form.html'
+    success_url = '/tareas/'
 
+
+    '''
     def form_valid(self, form):
         form.instance.proyecto = Proyecto.objects.get(id=self.kwargs['proyecto_id'])
         return super().form_valid(form)
 
     def get_success_url(self):
         return reverse_lazy('proyecto_detalle', kwargs={'pk': self.kwargs['proyecto_id']})
+    '''
 
 class TareaUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Tarea
