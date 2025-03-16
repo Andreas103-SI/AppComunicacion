@@ -18,6 +18,8 @@ from django.db import models
 
 
 
+
+
 def home_view(request):
     return render(request, "home.html")
 
@@ -64,49 +66,70 @@ class TareaListView(LoginRequiredMixin, ListView):
     context_object_name = 'tareas'
 
     def get_queryset(self):
-        print('queryset')
         proyecto_id = self.kwargs.get('proyecto_id')
         print(f"Proyecto ID: {proyecto_id}")  # Depuración
+        print(f"Usuario autenticado: {self.request.user}, Autenticado: {self.request.user.is_authenticated}")  # Depuración
         if proyecto_id:
-            # Si es administrador, muestra todas las tareas del proyecto
             if self.request.user.is_superuser or self.request.user.is_staff:
+                print("Usuario es superusuario o staff, mostrando todas las tareas.")
                 tareas = Tarea.objects.filter(proyecto_id=proyecto_id)
+            elif self.request.user.is_authenticated:
+                print(f"Filtrando tareas para usuario ID: {self.request.user.id}")  # Depuración
+                q1 = models.Q(asignado_a=self.request.user)
+                q2 = models.Q(usuarios_asignados=self.request.user)
+                try:
+                    print("Q1 creado:", q1)  # Depuración
+                    print("Q2 creado:", q2)  # Depuración
+                    tareas = Tarea.objects.filter(proyecto_id=proyecto_id).filter(q1 | q2)
+                except Exception as e:
+                    print(f"Error al crear el filtro: {e}")
+                    tareas = Tarea.objects.none()
             else:
-                # Para usuarios normales, muestra solo las tareas asignadas a ellos
-                tareas = Tarea.objects.filter(
-                    proyecto_id=proyecto_id
-                ).filter(
-                    models.Q(asignado_a=self.request.user) |
-                    models.Q(usuarios_asignados=self.request.user)
-                )
+                print("Usuario no autenticado, devolviendo queryset vacío.")
+                tareas = Tarea.objects.none()
             print(f"Tareas encontradas: {list(tareas)}")  # Depuración
             return tareas
+        print("Proyecto ID no proporcionado, devolviendo queryset vacío.")
         return Tarea.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         proyecto_id = self.kwargs.get('proyecto_id')
         context['proyecto_id'] = proyecto_id
-        context['proyecto'] = Proyecto.objects.get(id=proyecto_id)
+        if proyecto_id:
+            try:
+                context['proyecto'] = get_object_or_404(Proyecto, id=proyecto_id)
+            except Proyecto.DoesNotExist:
+                context['proyecto'] = None
+        else:
+            context['proyecto'] = None
         return context
-
-
+    
 class TareaCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Tarea
     form_class = TareaForm
     template_name = 'tareas/tarea_form.html'
-    success_url = '/tareas/'
 
-
-    '''
     def form_valid(self, form):
-        form.instance.proyecto = Proyecto.objects.get(id=self.kwargs['proyecto_id'])
+        proyecto_id = self.kwargs.get('proyecto_id')
+        print(f"Proyecto ID desde URL: {proyecto_id}")  # Depuración
+        if not proyecto_id:
+            raise ValueError("No se proporcionó un proyecto_id en la URL.")
+        proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+        print(f"Proyecto encontrado: {proyecto}")  # Depuración
+        form.instance.proyecto = proyecto
+        print(f"Proyecto asignado a la tarea: {form.instance.proyecto}")  # Depuración
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('proyecto_detalle', kwargs={'pk': self.kwargs['proyecto_id']})
-    '''
+        proyecto_id = self.kwargs.get('proyecto_id')
+        return reverse_lazy('tarea_list', kwargs={'proyecto_id': proyecto_id})
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['proyecto_id'] = self.kwargs.get('proyecto_id')
+        return context
+        
 class TareaUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Tarea
     form_class = TareaForm
