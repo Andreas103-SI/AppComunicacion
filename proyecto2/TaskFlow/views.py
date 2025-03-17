@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView #Agrega DetailView a la lista de importaciones.
 from .models import Proyecto, Tarea, Comentario
-from .forms import RegistroForm, ProyectoForm, ComentarioForm
+from .forms import RegistroForm, ProyectoForm, ComentarioForm, MensajeForm
 from .mixins import AdminRequiredMixin
 from .forms import TareaForm
 from django.http import Http404
@@ -15,7 +15,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
-from .forms import MensajeForm
 
 
 

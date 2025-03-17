@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from .models import Proyecto
 from .models import Tarea
 from .models import Comentario
+from .models import Mensaje
 
 User = get_user_model()
 
