@@ -15,6 +15,11 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
+from .forms import MensajeForm
+
+
+
+
 
 
 
@@ -111,7 +116,8 @@ class TareaListView(LoginRequiredMixin, ListView):
             context['proyecto'] = None
         return context
     
-class TareaCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
+
+class TareaCreateView(LoginRequiredMixin, CreateView):
     model = Tarea
     form_class = TareaForm
     template_name = 'tareas/tarea_form.html'
@@ -125,7 +131,24 @@ class TareaCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
         print(f"Proyecto encontrado: {proyecto}")  # Depuración
         form.instance.proyecto = proyecto
         print(f"Proyecto asignado a la tarea: {form.instance.proyecto}")  # Depuración
-        return super().form_valid(form)
+        
+        # Guardar la tarea
+        response = super().form_valid(form)
+        
+        # Generar notificaciones para los usuarios asignados
+        tarea = self.object  # La tarea recién creada
+        if tarea.asignado_a:
+            Notificacion.objects.create(
+                usuario=tarea.asignado_a,
+                mensaje=f"Se te ha asignado la tarea '{tarea.nombre}' en el proyecto '{proyecto.nombre}'."
+            )
+        for usuario in tarea.usuarios_asignados.all():
+            Notificacion.objects.create(
+                usuario=usuario,
+                mensaje=f"Has sido asignado a la tarea '{tarea.nombre}' en el proyecto '{proyecto.nombre}'."
+            )
+        
+        return response
 
     def get_success_url(self):
         proyecto_id = self.kwargs.get('proyecto_id')
@@ -135,7 +158,7 @@ class TareaCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['proyecto_id'] = self.kwargs.get('proyecto_id')
         return context
-        
+
 class TareaUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Tarea
     form_class = TareaForm
@@ -175,10 +198,24 @@ class ProyectoDetailView(LoginRequiredMixin, DetailView):
 class MensajeListView(LoginRequiredMixin, ListView):
     model = Mensaje
     template_name = 'mensajes/mensaje_list.html'
+    context_object_name = 'mensajes'
 
     def get_queryset(self):
-        return Mensaje.objects.filter(destinatario=self.request.user).order_by('-fecha')
-    
+        # Muestra mensajes recibidos y enviados por el usuario
+        return Mensaje.objects.filter(
+            models.Q(destinatario=self.request.user) | models.Q(remitente=self.request.user)
+        ).order_by('-fecha')    
+
+
+class MensajeCreateView(LoginRequiredMixin, CreateView):
+    model = Mensaje
+    form_class = MensajeForm
+    template_name = 'mensajes/mensaje_form.html'
+    success_url = reverse_lazy('mensajes')
+
+    def form_valid(self, form):
+        form.instance.remitente = self.request.user
+        return super().form_valid(form)
     
 class ComentarioCreateView(LoginRequiredMixin, CreateView):
     model = Comentario
@@ -210,11 +247,21 @@ class NotificacionesView(LoginRequiredMixin, ListView):
         ).order_by('-fecha')
         
 
+
+
 @login_required
 def marcar_notificacion_leida(request, notificacion_id):
+    """
+    Marca una notificación como leída y redirige a la lista de notificaciones.
+    
+    Args:
+        request: La solicitud HTTP.
+        notificacion_id (int): El ID de la notificación a marcar como leída.
+    
+    Retorna:
+        HttpResponse: Redirige a la vista de notificaciones.
+    """
     notificacion = get_object_or_404(Notificacion, id=notificacion_id, usuario=request.user)
-    if request.method == "POST":
-        notificacion.leida = True
-        notificacion.save()
-    # Después de marcarla como leída, redirige a la vista de notificaciones
+    notificacion.leida = True
+    notificacion.save()
     return redirect('notificaciones')

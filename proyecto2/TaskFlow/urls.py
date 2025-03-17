@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     home_view, ProyectoListView, ProyectoCreateView, ProyectoUpdateView, ProyectoDeleteView,
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView, ProyectoDetailView,
-    MensajeListView, ComentarioCreateView, NotificacionesView, marcar_notificacion_leida
+    MensajeListView, ComentarioCreateView, NotificacionesView, marcar_notificacion_leida,MensajeCreateView
 )
 
 urlpatterns = [
@@ -21,7 +21,13 @@ urlpatterns = [
     
     path('mensajes/', MensajeListView.as_view(), name='mensajes'),
     path('tareas/<int:tarea_id>/comentarios/crear/', ComentarioCreateView.as_view(), name='comentario_crear'),
-    
+    path('mensajes/crear/', MensajeCreateView.as_view(), name='mensaje_crear'),
+
+
     path('notificaciones/', NotificacionesView.as_view(), name='notificaciones'),
     path('notificaciones/<int:notificacion_id>/marcar-leida/', marcar_notificacion_leida, name='marcar_notificacion_leida'),
+    path('proyectos/<int:proyecto_id>/tareas/', TareaListView.as_view(), name='tarea_list'),
+    path('proyectos/<int:proyecto_id>/tareas/crear/', TareaCreateView.as_view(), name='tarea_crear'),
+    path('notificaciones/', NotificacionesView.as_view(), name='notificaciones'),
+   
 ]

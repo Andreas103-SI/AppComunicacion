@@ -32,3 +32,14 @@ class ComentarioForm(forms.ModelForm):
     class Meta:
         model = Comentario
         fields = ['contenido']
+
+# Formulario para enviar mensajes
+class MensajeForm(forms.ModelForm):
+    destinatario = forms.ModelChoiceField(queryset=User.objects.all(), label="Destinatario")
+
+    class Meta:
+        model = Mensaje
+        fields = ['destinatario', 'contenido']
+        widgets = {
+            'contenido': forms.Textarea(attrs={'rows': 4}),
+        }

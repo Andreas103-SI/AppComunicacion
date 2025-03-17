@@ -1,11 +1,20 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block content %}
 <h1>Mensajes</h1>
+<a href="{% url 'mensaje_crear' %}">Enviar Mensaje</a>
 <ul>
-    {% for mensaje in object_list %}
-    <li>{{ mensaje.contenido }} - {{ mensaje.fecha }}</li>
+    {% for mensaje in mensajes %}
+        <li>
+            De: {{ mensaje.remitente }} | Para: {{ mensaje.destinatario }} | {{ mensaje.fecha }} 
+            <p>{{ mensaje.contenido }}</p>
+            {% if mensaje.destinatario == user and not mensaje.leido %}
+                (No leído)
+            {% endif %}
+        </li>
     {% empty %}
-    <li>No hay mensajes.</li>
+        <li>No tienes mensajes.</li>
     {% endfor %}
 </ul>
+<a href="{% url 'home' %}">Volver al Inicio</a>
 {% endblock %}
