@@ -6,11 +6,10 @@
 <ul>
     {% for mensaje in mensajes %}
         <li>
-            De: {{ mensaje.remitente }} | Para: {{ mensaje.destinatario }} | {{ mensaje.fecha }} 
+            De: {{ mensaje.usuario_emisor }} | 
+            Para: {% if mensaje.usuario_receptor %}{{ mensaje.usuario_receptor }}{% else %}{{ mensaje.grupo }}{% endif %} | 
+            {{ mensaje.fecha_envio }}
             <p>{{ mensaje.contenido }}</p>
-            {% if mensaje.destinatario == user and not mensaje.leido %}
-                (No leído)
-            {% endif %}
         </li>
     {% empty %}
         <li>No tienes mensajes.</li>

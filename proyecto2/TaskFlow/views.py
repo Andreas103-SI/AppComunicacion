@@ -200,11 +200,12 @@ class MensajeListView(LoginRequiredMixin, ListView):
     context_object_name = 'mensajes'
 
     def get_queryset(self):
-        # Muestra mensajes recibidos y enviados por el usuario
+        # Muestra mensajes enviados o recibidos por el usuario, o mensajes dirigidos a un grupo al que pertenece
         return Mensaje.objects.filter(
-            models.Q(destinatario=self.request.user) | models.Q(remitente=self.request.user)
-        ).order_by('-fecha')    
-
+            models.Q(usuario_receptor=self.request.user) |
+            models.Q(usuario_emisor=self.request.user) |
+            models.Q(grupo__usuarios=self.request.user)
+        ).order_by('-fecha_envio')
 
 class MensajeCreateView(LoginRequiredMixin, CreateView):
     model = Mensaje
@@ -213,9 +214,9 @@ class MensajeCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('mensajes')
 
     def form_valid(self, form):
-        form.instance.remitente = self.request.user
+        form.instance.usuario_emisor = self.request.user
         return super().form_valid(form)
-    
+        
 class ComentarioCreateView(LoginRequiredMixin, CreateView):
     model = Comentario
     form_class = ComentarioForm
