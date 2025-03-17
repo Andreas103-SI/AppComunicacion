@@ -1,20 +1,17 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block content %}
-<h1>Lista de Proyectos</h1>
+<h1>Proyectos</h1>
 <ul>
-    {% for proyecto in object_list %}
-    <li>
-        <a href="{% url 'proyecto_detalle' proyecto.id %}">{{ proyecto.nombre }}</a> - {{ proyecto.descripcion }}
-        {% if user.is_staff or user.is_superuser %}
-            <a href="{% url 'proyectos_editar' proyecto.id %}">Editar</a>
-            <a href="{% url 'proyectos_eliminar' proyecto.id %}">Eliminar</a>
-        {% endif %}
-    </li>
+    {% for proyecto in proyectos %}
+        <li>{{ proyecto.nombre }} 
+            <a href="{% url 'proyecto_detalle' proyecto.id %}">Ver</a>
+            <a href="{% url 'proyecto_editar' proyecto.id %}">Editar</a>
+            <a href="{% url 'proyecto_eliminar' proyecto.id %}">Eliminar</a>
+        </li>
     {% empty %}
-    <li>No hay proyectos aún.</li>
+        <li>No hay proyectos disponibles.</li>
     {% endfor %}
 </ul>
-{% if user.is_staff or user.is_superuser %}
-    <a href="{% url 'proyectos_crear' %}">Crear Proyecto</a>
-{% endif %}
+<a href="{% url 'proyecto_crear' %}">Crear Proyecto</a>
 {% endblock %}

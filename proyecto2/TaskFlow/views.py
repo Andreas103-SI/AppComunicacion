@@ -37,6 +37,12 @@ class RegistroView(CreateView):
 class ProyectoListView(LoginRequiredMixin, ListView):
     model = Proyecto
     template_name = 'proyectos/proyecto_list.html'
+    context_object_name = 'proyectos'
+
+    def get_queryset(self):
+        if self.request.user.is_superuser or self.request.user.is_staff:
+            return Proyecto.objects.all()
+        return Proyecto.objects.filter(usuarios=self.request.user)
 
 class ProyectoCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Proyecto

@@ -1,31 +1,26 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Mi Aplicación{% endblock %}</title>
-  </head>
-  <body>
-    <header>
-      <h1>TaskFlow</h1>
-      <nav>
+<html>
+<head>
+    <title>TaskFlow</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav>
         <a href="{% url 'home' %}">Inicio</a>
-        {% if user.is_authenticated %}
         <a href="{% url 'proyectos' %}">Proyectos</a>
-        <a href="{% url 'logout' %}">Cerrar Sesión</a>
-        <!-- Enlace a las notificaciones, solo si el usuario está autenticado -->
-        <a href="{% url 'notificaciones' %}">
-          Notificaciones ({{ notificaciones_no_leidas }})
-        </a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">Cerrar Sesión</a>
+            <a href="{% url 'notificaciones' %}">Notificaciones ({{ notificaciones_no_leidas }})</a>
         {% else %}
-        <a href="{% url 'login' %}">Iniciar Sesión</a>
-        <a href="{% url 'registro' %}">Registrarse</a>
+            <a href="{% url 'login' %}">Iniciar Sesión</a>
+            <a href="{% url 'registro' %}">Registro</a>
         {% endif %}
-      </nav>
-    </header>
-    <main>{% block content %} {% endblock %}</main>
+    </nav>
+    {% block content %}
+    {% endblock %}
     <footer>
-      <p>© 2025 TaskFlow</p>
+        <p>© 2025 TaskFlow</p>
     </footer>
-  </body>
+</body>
 </html>
