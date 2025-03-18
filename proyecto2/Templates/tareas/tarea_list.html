@@ -23,7 +23,7 @@
         <li>No hay tareas para este proyecto.</li>
     {% endfor %}
 </ul>
-{% if user.is_authenticated and proyecto_id %}
+{% if user.is_authenticated and user.is_superuser %}  <!-- Restringe a superusuarios -->
     <a href="{% url 'tarea_crear' proyecto_id %}">Crear Tarea</a>
 {% endif %}
 <a href="{% url 'proyectos' %}">Volver a Proyectos</a>

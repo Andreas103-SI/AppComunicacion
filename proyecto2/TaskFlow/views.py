@@ -1,20 +1,21 @@
 from django.shortcuts import render
+# Importaciones de Django
+from django.db import models
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.views import LoginView, LogoutView
-from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView 
-from .models import Proyecto, Tarea, Comentario
-from .forms import RegistroForm, ProyectoForm, ComentarioForm, MensajeForm
-from .mixins import AdminRequiredMixin
-from .forms import TareaForm
-from django.http import Http404
-from django.shortcuts import render
-from .models import Mensaje
-from .models import Notificacion
-from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import models
+from django.urls import reverse_lazy
+from django.http import Http404, HttpResponseRedirect
+
+# Importaciones de vistas genéricas de Django
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+
+# Importaciones de TaskFlow
+from .models import Proyecto, Tarea, Comentario, Mensaje, Notificacion
+from .forms import RegistroForm, ProyectoForm, ComentarioForm, MensajeForm, TareaForm
+from .mixins import AdminRequiredMixin
+
 
 
 
@@ -74,6 +75,8 @@ class ProyectoDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
         return Proyecto.objects.all()
 
 
+
+
 class TareaListView(LoginRequiredMixin, ListView):
     model = Tarea
     template_name = 'tareas/tarea_list.html'
@@ -84,8 +87,10 @@ class TareaListView(LoginRequiredMixin, ListView):
         if proyecto_id:
             proyecto = get_object_or_404(Proyecto, id=proyecto_id)
             if self.request.user.is_superuser or self.request.user.is_staff:
+                # Administradores ven todas las tareas del proyecto
                 return Tarea.objects.filter(proyecto_id=proyecto_id).prefetch_related('comentarios')
             elif self.request.user.is_authenticated:
+                # Miembros ven solo las tareas asignadas a ellos
                 q1 = models.Q(asignado_a=self.request.user)
                 q2 = models.Q(usuarios_asignados=self.request.user)
                 return Tarea.objects.filter(proyecto_id=proyecto_id).filter(q1 | q2).prefetch_related('comentarios')
@@ -100,9 +105,10 @@ class TareaListView(LoginRequiredMixin, ListView):
             context['proyecto'] = get_object_or_404(Proyecto, id=proyecto_id)
         return context
 
-class TareaDetailView(DetailView):
+
+class TareaDetailView(LoginRequiredMixin, DetailView):
     model = Tarea
-    template_name = 'tarea_detalle.html'
+    template_name = 'tareas/tarea_detalle.html'
     context_object_name = 'tarea'
 
 
@@ -224,7 +230,7 @@ class MensajeCreateView(LoginRequiredMixin, CreateView):
 class ComentarioCreateView(LoginRequiredMixin, CreateView):
     model = Comentario
     form_class = ComentarioForm
-    template_name = 'comentarios/comentario_form.html'  # Ajusta la ruta según tu estructura
+    template_name = 'comentarios/comentario_form.html'
 
     def form_valid(self, form):
         tarea_id = self.kwargs.get('tarea_id')
@@ -263,17 +269,8 @@ class NotificacionesView(LoginRequiredMixin, ListView):
 
 @login_required
 def marcar_notificacion_leida(request, notificacion_id):
-    """
-    Marca una notificación como leída y redirige a la lista de notificaciones.
-    
-    Args:
-        request: La solicitud HTTP.
-        notificacion_id (int): El ID de la notificación a marcar como leída.
-    
-    Retorna:
-        HttpResponse: Redirige a la vista de notificaciones.
-    """
-    notificacion = get_object_or_404(Notificacion, id=notificacion_id, usuario=request.user)
-    notificacion.leida = True
-    notificacion.save()
-    return redirect('notificaciones')
+    if request.method == 'POST':
+        notificacion = get_object_or_404(Notificacion, id=notificacion_id, usuario=request.user)
+        notificacion.leida = True
+        notificacion.save()
+    return HttpResponseRedirect(reverse_lazy('notificaciones'))
