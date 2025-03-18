@@ -4,7 +4,10 @@ from django.db import models
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic.edit import DeleteView
+
+
 from django.urls import reverse_lazy
 from django.http import Http404, HttpResponseRedirect
 
@@ -15,6 +18,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from .models import Proyecto, Tarea, Comentario, Mensaje, Notificacion
 from .forms import RegistroForm, ProyectoForm, ComentarioForm, MensajeForm, TareaForm
 from .mixins import AdminRequiredMixin
+
 
 
 
@@ -66,13 +70,21 @@ class ProyectoUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     template_name = 'proyectos/proyecto_update.html'
     success_url = '/proyectos/'
 
-class ProyectoDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
-    model = Proyecto
-    success_url = reverse_lazy('proyectos')
-    template_name = 'proyectos/proyecto_confirm_delete.html'
 
-    def get_queryset(self):
-        return Proyecto.objects.all()
+class ProyectoDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Proyecto
+    template_name = 'proyectos/proyecto_confirm_delete.html'
+    success_url = reverse_lazy('proyectos')
+
+    def test_func(self):
+        # Solo el superusuario o el creador del proyecto puede eliminarlo
+        proyecto = self.get_object()
+        return self.request.user.is_superuser or (hasattr(proyecto, 'creador') and proyecto.creador == self.request.user)
+
+    def handle_no_permission(self):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("No tienes permiso para eliminar este proyecto.")
+
 
 
 
@@ -87,10 +99,8 @@ class TareaListView(LoginRequiredMixin, ListView):
         if proyecto_id:
             proyecto = get_object_or_404(Proyecto, id=proyecto_id)
             if self.request.user.is_superuser or self.request.user.is_staff:
-                # Administradores ven todas las tareas del proyecto
                 return Tarea.objects.filter(proyecto_id=proyecto_id).prefetch_related('comentarios')
             elif self.request.user.is_authenticated:
-                # Miembros ven solo las tareas asignadas a ellos
                 q1 = models.Q(asignado_a=self.request.user)
                 q2 = models.Q(usuarios_asignados=self.request.user)
                 return Tarea.objects.filter(proyecto_id=proyecto_id).filter(q1 | q2).prefetch_related('comentarios')
@@ -208,22 +218,27 @@ class MensajeListView(LoginRequiredMixin, ListView):
             models.Q(usuario_receptor=self.request.user) | models.Q(usuario_emisor=self.request.user)
         ).order_by('-fecha_envio')
         
+
 class MensajeCreateView(LoginRequiredMixin, CreateView):
     model = Mensaje
     form_class = MensajeForm
     template_name = 'mensajes/mensaje_form.html'
     success_url = reverse_lazy('mensajes')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['proyecto_id'] = self.kwargs.get('proyecto_id')
+        return context
+
     def form_valid(self, form):
         form.instance.usuario_emisor = self.request.user
-        proyecto_id = self.kwargs.get('proyecto_id')  # Opcional, para mensajes relacionados con un proyecto
+        proyecto_id = self.kwargs.get('proyecto_id')
         if proyecto_id:
             proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-            grupo = proyecto.grupos.first()  # Toma el primer grupo del proyecto (ajusta según tu lógica)
+            grupo = proyecto.grupos.first()
             if grupo:
                 form.instance.grupo = grupo
         return super().form_valid(form)
-
 #Comentario
 
 

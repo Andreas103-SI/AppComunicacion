@@ -5,8 +5,9 @@
 <p>Descripción: {{ proyecto.descripcion }}</p>
 <h2>Tareas</h2>
 <a href="{% url 'tarea_list' proyecto.id %}">Ver Tareas</a>
-{% if user.is_authenticated %}
+{% if user.is_authenticated and user.is_superuser %}
     <a href="{% url 'tarea_crear' proyecto.id %}">Crear Tarea</a>
+    <a href="{% url 'proyecto_eliminar' proyecto.id %}" onclick="return confirm('¿Estás seguro?')">Eliminar Proyecto</a>
 {% endif %}
 <h2>Mensajes del Proyecto</h2>
 <a href="{% url 'mensajes_proyecto' proyecto.id %}">Ver Mensajes</a>
