@@ -22,6 +22,7 @@ from .mixins import AdminRequiredMixin
 
 
 
+# Vistas de Inicio
 
 def home_view(request):
     return render(request, "home.html")
@@ -48,14 +49,27 @@ class ProyectoListView(LoginRequiredMixin, ListView):
         return Proyecto.objects.filter(usuarios=self.request.user)
 
 
+# Vista para detalles de proyecto
 class ProyectoDetailView(LoginRequiredMixin, DetailView):
     model = Proyecto
-    template_name = 'proyectos/proyecto_detalle.html'
+    template_name = 'proyectos/proyecto_detail.html'
     context_object_name = 'proyecto'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Proyecto.objects.all()
+        return Proyecto.objects.filter(usuarios=self.request.user)
+
+    def handle_no_permission(self):
+        return render(self.request, 'proyectos/no_permission.html', {'message': 'No tienes permiso para acceder a la información de este proyecto.'})
+
+    def get(self, request, *args, **kwargs):
+        try:
+            return super().get(request, *args, **kwargs)
+        except Http404:
+            return self.handle_no_permission()
+
+
 
 class ProyectoCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Proyecto
@@ -86,7 +100,7 @@ class ProyectoDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 
-
+# Vistas de Tareas
 
 class TareaListView(LoginRequiredMixin, ListView):
     model = Tarea
@@ -189,83 +203,110 @@ class TareaDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
         return reverse_lazy('proyecto_detalle', kwargs={'pk': self.object.proyecto.id})
 
 
-class ProyectoDetailView(LoginRequiredMixin, DetailView):
-    model = Proyecto
-    template_name = 'proyectos/proyecto_detail.html'
-    context_object_name = 'proyecto'
-
-    def get_queryset(self):
-        if self.request.user.is_staff:
-            return Proyecto.objects.all()
-        return Proyecto.objects.filter(usuarios=self.request.user)
-
-    def handle_no_permission(self):
-        return render(self.request, 'proyectos/no_permission.html', {'message': 'No tienes permiso para acceder a la información de este proyecto.'})
-
-    def get(self, request, *args, **kwargs):
-        try:
-            return super().get(request, *args, **kwargs)
-        except Http404:
-            return self.handle_no_permission()
 
 
+# Vistas de Mensajes
+
+# Vista para listar mensajes
 class MensajeListView(LoginRequiredMixin, ListView):
     model = Mensaje
-    template_name = 'mensajes/mensajes_list.html'
+    template_name = 'mensajes/mensaje_list.html'
     context_object_name = 'mensajes'
 
     def get_queryset(self):
         proyecto_id = self.kwargs.get('proyecto_id')
+        if proyecto_id:
+            proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+            grupos = proyecto.grupos.all()  # Obtiene todos los grupos del proyecto
+            return Mensaje.objects.filter(
+                models.Q(grupo__in=grupos) | 
+                models.Q(usuario_receptor=self.request.user) | 
+                models.Q(usuario_emisor=self.request.user)
+            ).order_by('-fecha_envio')
         return Mensaje.objects.filter(
-            Q(usuario_receptor=self.request.user) | Q(usuario_emisor=self.request.user),
-            grupo__proyecto_id=proyecto_id
-        )
-
+            models.Q(usuario_receptor=self.request.user) | 
+            models.Q(usuario_emisor=self.request.user)
+        ).order_by('-fecha_envio')
+        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['proyecto_id'] = self.kwargs.get('proyecto_id')
         return context
-
-        
-
-
+    
+# Vista para crear un mensaje (individual o grupal)
 class MensajeCreateView(LoginRequiredMixin, CreateView):
     model = Mensaje
     form_class = MensajeForm
     template_name = 'mensajes/mensaje_form.html'
+    success_url = reverse_lazy('mensajes')
 
-    def form_valid(self, form):
-        form.instance.usuario_emisor = self.request.user
-        proyecto_id = self.kwargs.get('proyecto_id')
-        grupo = Grupo.objects.get(proyecto_id=proyecto_id)
-        form.instance.grupo = grupo
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        proyecto_id = self.kwargs.get('proyecto_id')
-        return reverse('mensajes_proyecto', kwargs={'proyecto_id': proyecto_id})
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['proyecto_id'] = self.kwargs.get('proyecto_id')
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['proyecto_id'] = self.kwargs.get('proyecto_id')
         return context
 
+    def get_success_url(self):
+        proyecto_id = self.kwargs.get('proyecto_id')
+        return reverse_lazy('mensajes_proyecto', kwargs={'proyecto_id': proyecto_id}) if proyecto_id else reverse_lazy('mensajes')
+
+    def form_valid(self, form):
+        form.instance.usuario_emisor = self.request.user
+        proyecto_id = self.kwargs.get('proyecto_id')
+        if proyecto_id:
+            proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+            if form.cleaned_data['receptor_type'] == 'group' and form.cleaned_data['grupo']:
+                form.instance.grupo = form.cleaned_data['grupo']
+                form.instance.usuario_receptor = None
+            elif form.cleaned_data['receptor_type'] == 'user':
+                form.instance.grupo = None
+        return super().form_valid(form)   
+    
+# Vista para responder a un mensaje
 class MensajeReplyCreateView(LoginRequiredMixin, CreateView):
     model = Mensaje
     form_class = MensajeForm
     template_name = 'mensajes/mensaje_reply_form.html'
+    success_url = reverse_lazy('mensajes')
 
-    def form_valid(self, form):
-        mensaje_original = get_object_or_404(Mensaje, id=self.kwargs['mensaje_id'])
-        form.instance.usuario_emisor = self.request.user
-        form.instance.usuario_receptor = mensaje_original.usuario_emisor
-        form.instance.grupo = mensaje_original.grupo
-        form.instance.contenido = f"Respuesta: {form.instance.contenido}"
-        return super().form_valid(form)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['proyecto_id'] = self.kwargs.get('proyecto_id')
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['proyecto_id'] = self.kwargs.get('proyecto_id')
+        mensaje_id = self.kwargs.get('mensaje_id')
+        if mensaje_id:
+            context['mensaje_original'] = get_object_or_404(Mensaje, id=mensaje_id)
+        return context
 
     def get_success_url(self):
-        return reverse_lazy('mensajes_proyecto', kwargs={'proyecto_id': self.kwargs['proyecto_id']})
+        proyecto_id = self.kwargs.get('proyecto_id')
+        return reverse_lazy('mensajes_proyecto', kwargs={'proyecto_id': proyecto_id}) if proyecto_id else reverse_lazy('mensajes')
 
+    def form_valid(self, form):
+        form.instance.usuario_emisor = self.request.user
+        proyecto_id = self.kwargs.get('proyecto_id')
+        mensaje_id = self.kwargs.get('mensaje_id')
+        if proyecto_id and mensaje_id:
+            proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+            mensaje_original = get_object_or_404(Mensaje, id=mensaje_id)
+            if mensaje_original.grupo:
+                form.instance.grupo = mensaje_original.grupo
+                form.instance.usuario_receptor = None
+            else:
+                form.instance.usuario_receptor = mensaje_original.usuario_emisor
+                form.instance.grupo = None
+        return super().form_valid(form)
+    
+    
+# Vista para eliminar un mensaje                                  
 class MensajeDeleteView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         mensaje = get_object_or_404(Mensaje, id=self.kwargs['mensaje_id'])

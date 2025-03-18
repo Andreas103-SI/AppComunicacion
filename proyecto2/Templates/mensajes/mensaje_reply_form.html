@@ -1,11 +1,30 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Responder al Mensaje</h1>
+<h1>Responder a Mensaje</h1>
+<p>Mensaje original de {{ mensaje_original.usuario_emisor }} a {% if mensaje_original.usuario_receptor %}{{ mensaje_original.usuario_receptor }}{% else %}{{ mensaje_original.grupo.nombre }}{% endif %}:</p>
+<p>{{ mensaje_original.contenido }}</p>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Enviar</button>
+    {{ form.receptor_type.label_tag }} {{ form.receptor_type }}
+    {% if form.receptor_type.value == 'user' or form.receptor_type.value == '' %}
+        {{ form.usuario_receptor.label_tag }} {{ form.usuario_receptor }}
+    {% elif form.receptor_type.value == 'group' %}
+        {{ form.grupo.label_tag }} {{ form.grupo }}
+    {% endif %}
+    {{ form.contenido.label_tag }} {{ form.contenido }}
+    <button type="submit">Enviar Respuesta</button>
 </form>
 <a href="{% url 'mensajes_proyecto' proyecto_id %}">Volver a Mensajes</a>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.querySelectorAll('input[name="receptor_type"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const form = document.querySelector('form');
+            form.submit();
+        });
+    });
+</script>
 {% endblock %}
