@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView #Agrega DetailView a la lista de importaciones.
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView 
 from .models import Proyecto, Tarea, Comentario
 from .forms import RegistroForm, ProyectoForm, ComentarioForm, MensajeForm
 from .mixins import AdminRequiredMixin
@@ -15,11 +15,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
-
-
-
-
-
 
 
 
@@ -47,6 +42,16 @@ class ProyectoListView(LoginRequiredMixin, ListView):
         if self.request.user.is_superuser or self.request.user.is_staff:
             return Proyecto.objects.all()
         return Proyecto.objects.filter(usuarios=self.request.user)
+
+class ProyectoDetailView(LoginRequiredMixin, DetailView):
+    model = Proyecto
+    template_name = 'proyectos/proyecto_detalle.html'
+    context_object_name = 'proyecto'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Puedes agregar más contexto si lo necesitas (por ejemplo, tareas o mensajes del proyecto)
+        return context
 
 class ProyectoCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Proyecto
@@ -77,29 +82,16 @@ class TareaListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         proyecto_id = self.kwargs.get('proyecto_id')
-        print(f"Proyecto ID: {proyecto_id}")  # Depuración
-        print(f"Usuario autenticado: {self.request.user}, Autenticado: {self.request.user.is_authenticated}")  # Depuración
         if proyecto_id:
+            proyecto = get_object_or_404(Proyecto, id=proyecto_id)
             if self.request.user.is_superuser or self.request.user.is_staff:
-                print("Usuario es superusuario o staff, mostrando todas las tareas.")
-                tareas = Tarea.objects.filter(proyecto_id=proyecto_id)
+                return Tarea.objects.filter(proyecto_id=proyecto_id)
             elif self.request.user.is_authenticated:
-                print(f"Filtrando tareas para usuario ID: {self.request.user.id}")  # Depuración
                 q1 = models.Q(asignado_a=self.request.user)
                 q2 = models.Q(usuarios_asignados=self.request.user)
-                try:
-                    print("Q1 creado:", q1)  # Depuración
-                    print("Q2 creado:", q2)  # Depuración
-                    tareas = Tarea.objects.filter(proyecto_id=proyecto_id).filter(q1 | q2)
-                except Exception as e:
-                    print(f"Error al crear el filtro: {e}")
-                    tareas = Tarea.objects.none()
+                return Tarea.objects.filter(proyecto_id=proyecto_id).filter(q1 | q2)
             else:
-                print("Usuario no autenticado, devolviendo queryset vacío.")
-                tareas = Tarea.objects.none()
-            print(f"Tareas encontradas: {list(tareas)}")  # Depuración
-            return tareas
-        print("Proyecto ID no proporcionado, devolviendo queryset vacío.")
+                return Tarea.objects.none()
         return Tarea.objects.none()
 
     def get_context_data(self, **kwargs):
@@ -107,14 +99,14 @@ class TareaListView(LoginRequiredMixin, ListView):
         proyecto_id = self.kwargs.get('proyecto_id')
         context['proyecto_id'] = proyecto_id
         if proyecto_id:
-            try:
-                context['proyecto'] = get_object_or_404(Proyecto, id=proyecto_id)
-            except Proyecto.DoesNotExist:
-                context['proyecto'] = None
-        else:
-            context['proyecto'] = None
-        return context
-    
+            context['proyecto'] = get_object_or_404(Proyecto, id=proyecto_id)
+        return context    
+
+class TareaDetailView(DetailView):
+    model = Tarea
+    template_name = 'tarea_detalle.html'
+    context_object_name = 'tarea'
+
 
 class TareaCreateView(LoginRequiredMixin, CreateView):
     model = Tarea
@@ -123,29 +115,30 @@ class TareaCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         proyecto_id = self.kwargs.get('proyecto_id')
-        print(f"Proyecto ID desde URL: {proyecto_id}")  # Depuración
         if not proyecto_id:
             raise ValueError("No se proporcionó un proyecto_id en la URL.")
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-        print(f"Proyecto encontrado: {proyecto}")  # Depuración
         form.instance.proyecto = proyecto
-        print(f"Proyecto asignado a la tarea: {form.instance.proyecto}")  # Depuración
         
-        # Guardar la tarea
         response = super().form_valid(form)
         
-        # Generar notificaciones para los usuarios asignados
-        tarea = self.object  # La tarea recién creada
-        if tarea.asignado_a:
+        tarea = self.object
+        usuarios_notificados = set()  # Para evitar duplicados
+        
+        if tarea.asignado_a and tarea.asignado_a not in usuarios_notificados:
             Notificacion.objects.create(
                 usuario=tarea.asignado_a,
                 mensaje=f"Se te ha asignado la tarea '{tarea.nombre}' en el proyecto '{proyecto.nombre}'."
             )
+            usuarios_notificados.add(tarea.asignado_a)
+        
         for usuario in tarea.usuarios_asignados.all():
-            Notificacion.objects.create(
-                usuario=usuario,
-                mensaje=f"Has sido asignado a la tarea '{tarea.nombre}' en el proyecto '{proyecto.nombre}'."
-            )
+            if usuario not in usuarios_notificados:
+                Notificacion.objects.create(
+                    usuario=usuario,
+                    mensaje=f"Has sido asignado a la tarea '{tarea.nombre}' en el proyecto '{proyecto.nombre}'."
+                )
+                usuarios_notificados.add(usuario)
         
         return response
 
@@ -157,7 +150,7 @@ class TareaCreateView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['proyecto_id'] = self.kwargs.get('proyecto_id')
         return context
-
+                
 class TareaUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Tarea
     form_class = TareaForm
@@ -200,13 +193,17 @@ class MensajeListView(LoginRequiredMixin, ListView):
     context_object_name = 'mensajes'
 
     def get_queryset(self):
-        # Muestra mensajes enviados o recibidos por el usuario, o mensajes dirigidos a un grupo al que pertenece
+        proyecto_id = self.kwargs.get('proyecto_id')
+        if proyecto_id:
+            # Filtra mensajes asociados al grupo del proyecto
+            return Mensaje.objects.filter(
+                models.Q(grupo__proyecto_id=proyecto_id) &
+                (models.Q(usuario_receptor=self.request.user) | models.Q(usuario_emisor=self.request.user))
+            ).order_by('-fecha_envio')
         return Mensaje.objects.filter(
-            models.Q(usuario_receptor=self.request.user) |
-            models.Q(usuario_emisor=self.request.user) |
-            models.Q(grupo__usuarios=self.request.user)
+            models.Q(usuario_receptor=self.request.user) | models.Q(usuario_emisor=self.request.user)
         ).order_by('-fecha_envio')
-
+        
 class MensajeCreateView(LoginRequiredMixin, CreateView):
     model = Mensaje
     form_class = MensajeForm
@@ -215,23 +212,40 @@ class MensajeCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.usuario_emisor = self.request.user
+        proyecto_id = self.kwargs.get('proyecto_id')  # Opcional, para mensajes relacionados con un proyecto
+        if proyecto_id:
+            proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+            grupo = proyecto.grupos.first()  # Toma el primer grupo del proyecto (ajusta según tu lógica)
+            if grupo:
+                form.instance.grupo = grupo
         return super().form_valid(form)
-        
+
+#Comentario
+
+
 class ComentarioCreateView(LoginRequiredMixin, CreateView):
     model = Comentario
     form_class = ComentarioForm
-    template_name = 'comentarios/comentario_form.html'
+    template_name = 'comentarios/comentario_form.html'  # Ajusta la ruta según tu estructura
 
     def form_valid(self, form):
-        form.instance.tarea = Tarea.objects.get(id=self.kwargs['tarea_id'])
+        tarea_id = self.kwargs.get('tarea_id')
+        tarea = get_object_or_404(Tarea, id=tarea_id)
+        form.instance.tarea = tarea
         form.instance.usuario = self.request.user
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('proyecto_detalle', kwargs={'pk': self.object.tarea.proyecto.id})
-    
-    
+        tarea_id = self.kwargs.get('tarea_id')
+        return reverse_lazy('tarea_detalle', kwargs={'pk': tarea_id})
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tarea_id = self.kwargs.get('tarea_id')
+        context['tarea'] = get_object_or_404(Tarea, id=tarea_id)
+        return context
+        
+#Notificaciones
 
 class NotificacionesView(LoginRequiredMixin, ListView):
     model = Notificacion

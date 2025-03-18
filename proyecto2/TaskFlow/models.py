@@ -101,6 +101,7 @@ class Mensaje(models.Model):
         receptor = self.usuario_receptor if self.usuario_receptor else "Grupo"
         return f"De {self.usuario_emisor} para {receptor}: {self.contenido[:30]}"
 
+# Modelo Comentario 
 class Comentario(models.Model):
     contenido = models.TextField()
     fecha_creacion = models.DateTimeField(auto_now_add=True)
@@ -110,7 +111,7 @@ class Comentario(models.Model):
         related_name='comentarios'
     )
     tarea = models.ForeignKey(
-        Tarea,
+        Tarea,  # Usa directamente el nombre de la clase, ya que está en el mismo archivo
         on_delete=models.CASCADE,
         related_name='comentarios'
     )

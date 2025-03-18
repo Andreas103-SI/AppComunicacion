@@ -1,23 +1,17 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block content %}
 <h1>{{ proyecto.nombre }}</h1>
-<p>{{ proyecto.descripcion }}</p>
+<p>Descripción: {{ proyecto.descripcion }}</p>
 <h2>Tareas</h2>
-<ul>
-    {% for tarea in tareas %}
-    <li>
-        {{ tarea.nombre }} - {{ tarea.estado }}
-        {% if user.is_staff or user.is_superuser %}
-            <a href="{% url 'tarea_editar' tarea.id %}">Editar</a>
-            <a href="{% url 'tarea_eliminar' tarea.id %}">Eliminar</a>
-        {% endif %}
-    </li>
-    {% empty %}
-    <li>No hay tareas para este proyecto.</li>
-    {% endfor %}
-</ul>
-{% if user.is_staff or user.is_superuser %}
-    <a href="{% url 'tarea_crear' proyecto_id=proyecto.id %}">Crear Tarea</a>
+<a href="{% url 'tarea_list' proyecto.id %}">Ver Tareas</a>
+{% if user.is_authenticated %}
+    <a href="{% url 'tarea_crear' proyecto.id %}">Crear Tarea</a>
+{% endif %}
+<h2>Mensajes del Proyecto</h2>
+<a href="{% url 'mensajes_proyecto' proyecto.id %}">Ver Mensajes</a>
+{% if user.is_authenticated %}
+    <a href="{% url 'mensaje_crear_proyecto' proyecto.id %}">Enviar Mensaje</a>
 {% endif %}
 <a href="{% url 'proyectos' %}">Volver a Proyectos</a>
 {% endblock %}
