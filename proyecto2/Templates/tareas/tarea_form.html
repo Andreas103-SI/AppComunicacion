@@ -1,10 +1,11 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block content %}
-<h1>{% if object %}Editar Tarea{% else %}Crear Tarea{% endif %}</h1>
+<h1>Crear Tarea</h1>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Guardar</button>
-    <a href="{% url 'tareas' %}">Cancelar</a>
 </form>
+<a href="{% url 'tarea_list' proyecto_id %}">Cancelar</a>
 {% endblock %}

@@ -23,7 +23,6 @@ from .mixins import AdminRequiredMixin
 
 
 
-
 def home_view(request):
     return render(request, "home.html")
 
@@ -48,6 +47,7 @@ class ProyectoListView(LoginRequiredMixin, ListView):
             return Proyecto.objects.all()
         return Proyecto.objects.filter(usuarios=self.request.user)
 
+
 class ProyectoDetailView(LoginRequiredMixin, DetailView):
     model = Proyecto
     template_name = 'proyectos/proyecto_detalle.html'
@@ -55,7 +55,6 @@ class ProyectoDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Puedes agregar más contexto si lo necesitas (por ejemplo, tareas o mensajes del proyecto)
         return context
 
 class ProyectoCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
@@ -122,6 +121,7 @@ class TareaDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'tarea'
 
 
+
 class TareaCreateView(LoginRequiredMixin, CreateView):
     model = Tarea
     form_class = TareaForm
@@ -129,16 +129,21 @@ class TareaCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         proyecto_id = self.kwargs.get('proyecto_id')
+        
+        # Si no se encuentra proyecto_id, redirige o muestra un mensaje
         if not proyecto_id:
-            raise ValueError("No se proporcionó un proyecto_id en la URL.")
+            return redirect('proyectos')  # O podrías redirigir a alguna página de error
+            
         proyecto = get_object_or_404(Proyecto, id=proyecto_id)
         form.instance.proyecto = proyecto
         
+        # Validación del formulario
         response = super().form_valid(form)
         
         tarea = self.object
-        usuarios_notificados = set()  # Para evitar duplicados
-        
+        usuarios_notificados = set()
+
+        # Notificaciones a los usuarios asignados
         if tarea.asignado_a and tarea.asignado_a not in usuarios_notificados:
             Notificacion.objects.create(
                 usuario=tarea.asignado_a,
@@ -146,6 +151,7 @@ class TareaCreateView(LoginRequiredMixin, CreateView):
             )
             usuarios_notificados.add(tarea.asignado_a)
         
+        # Notificación a otros usuarios asignados
         for usuario in tarea.usuarios_asignados.all():
             if usuario not in usuarios_notificados:
                 Notificacion.objects.create(
@@ -158,13 +164,15 @@ class TareaCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         proyecto_id = self.kwargs.get('proyecto_id')
+        if not proyecto_id:
+            return reverse_lazy('proyectos')  # O redirige a alguna página si no existe el proyecto_id
         return reverse_lazy('tarea_list', kwargs={'proyecto_id': proyecto_id})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['proyecto_id'] = self.kwargs.get('proyecto_id')
         return context
-                
+
 class TareaUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     model = Tarea
     form_class = TareaForm
@@ -203,42 +211,47 @@ class ProyectoDetailView(LoginRequiredMixin, DetailView):
 
 class MensajeListView(LoginRequiredMixin, ListView):
     model = Mensaje
-    template_name = 'mensajes/mensaje_list.html'
+    template_name = 'mensajes/mensajes_list.html'
     context_object_name = 'mensajes'
 
     def get_queryset(self):
         proyecto_id = self.kwargs.get('proyecto_id')
         if proyecto_id:
-            # Filtra mensajes asociados al grupo del proyecto
-            return Mensaje.objects.filter(
-                models.Q(grupo__proyecto_id=proyecto_id) &
-                (models.Q(usuario_receptor=self.request.user) | models.Q(usuario_emisor=self.request.user))
-            ).order_by('-fecha_envio')
-        return Mensaje.objects.filter(
-            models.Q(usuario_receptor=self.request.user) | models.Q(usuario_emisor=self.request.user)
-        ).order_by('-fecha_envio')
+            return Mensaje.objects.filter(proyecto_id=proyecto_id)
+        return Mensaje.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Pasar el proyecto_id al contexto para usarlo en la plantilla
+        context['proyecto_id'] = self.kwargs.get('proyecto_id')
+        return context
+
         
+
 
 class MensajeCreateView(LoginRequiredMixin, CreateView):
     model = Mensaje
     form_class = MensajeForm
     template_name = 'mensajes/mensaje_form.html'
-    success_url = reverse_lazy('mensajes')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['proyecto_id'] = self.kwargs.get('proyecto_id')
-        return context
 
     def form_valid(self, form):
+        # Asignar el usuario autenticado como el emisor del mensaje
         form.instance.usuario_emisor = self.request.user
+        # Si estás trabajando con proyectos, asegúrate de asociar el mensaje con el proyecto también
         proyecto_id = self.kwargs.get('proyecto_id')
         if proyecto_id:
-            proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-            grupo = proyecto.grupos.first()
-            if grupo:
-                form.instance.grupo = grupo
+            proyecto = Proyecto.objects.get(id=proyecto_id)
+            form.instance.proyecto = proyecto
+        
         return super().form_valid(form)
+
+    def get_success_url(self):
+        # Redirigir a la lista de mensajes del proyecto
+        proyecto_id = self.kwargs.get('proyecto_id')
+        if proyecto_id:
+            return reverse_lazy('mensajes_proyecto', kwargs={'proyecto_id': proyecto_id})
+        return reverse_lazy('mensajes')
+
 #Comentario
 
 
