@@ -237,20 +237,29 @@ class MensajeCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         # Asignar el usuario autenticado como el emisor del mensaje
         form.instance.usuario_emisor = self.request.user
-        # Si estás trabajando con proyectos, asegúrate de asociar el mensaje con el proyecto también
+
+        # Asignar el proyecto si lo hay
         proyecto_id = self.kwargs.get('proyecto_id')
         if proyecto_id:
             proyecto = Proyecto.objects.get(id=proyecto_id)
             form.instance.proyecto = proyecto
         
+        # Guardar el mensaje
         return super().form_valid(form)
 
     def get_success_url(self):
-        # Redirigir a la lista de mensajes del proyecto
+        # Redirigir a los mensajes del proyecto
         proyecto_id = self.kwargs.get('proyecto_id')
         if proyecto_id:
             return reverse_lazy('mensajes_proyecto', kwargs={'proyecto_id': proyecto_id})
         return reverse_lazy('mensajes')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        proyecto_id = self.kwargs.get('proyecto_id')
+        if proyecto_id:
+            context['proyecto_id'] = proyecto_id
+        return context
 
 #Comentario
 
