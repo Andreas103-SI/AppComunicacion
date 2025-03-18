@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Mensajes</h1>
 {% if user.is_authenticated %}
-    <a href="{% url 'mensaje_crear' %}">Enviar Mensaje</a>
+<a href="{% url 'mensaje_crear' proyecto_id=proyecto_id %}">Enviar Mensaje</a>
 {% endif %}
 <ul>
     {% for mensaje in mensajes %}

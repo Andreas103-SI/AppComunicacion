@@ -9,14 +9,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.edit import DeleteView
 from django.views.generic import View
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.http import Http404, HttpResponseRedirect
 
 # Importaciones de vistas genéricas de Django
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
 # Importaciones de TaskFlow
-from .models import Proyecto, Tarea, Comentario, Mensaje, Notificacion
+from .models import Proyecto, Tarea, Comentario, Mensaje, Notificacion, Grupo
 from .forms import RegistroForm, ProyectoForm, ComentarioForm, MensajeForm, TareaForm
 from .mixins import AdminRequiredMixin
 

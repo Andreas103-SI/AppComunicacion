@@ -64,9 +64,11 @@ urlpatterns = [
 
     # Mensajes por proyecto
     path('proyectos/<int:proyecto_id>/mensajes/', MensajeListView.as_view(), name='mensajes_proyecto'),
-    path('proyectos/<int:proyecto_id>/mensajes/crear/', MensajeCreateView.as_view(), name='mensaje_crear_proyecto'),
+    path('proyectos/<int:proyecto_id>/mensajes/crear/', MensajeCreateView.as_view(), name='mensaje_crear'),
 
     # Notificaciones
     path('notificaciones/', NotificacionesView.as_view(), name='notificaciones'),
     path('notificaciones/<int:notificacion_id>/marcar-leida/', marcar_notificacion_leida, name='marcar_notificacion_leida'),
+    
+
 ]
