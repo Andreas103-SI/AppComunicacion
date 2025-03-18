@@ -78,7 +78,7 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'],  # Esto debe apuntar a templates (minúscula)
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -86,12 +86,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'TaskFlow.context_processors.notificaciones_no_leidas',
             ],
         },
     },
 ]
-
 
 
 # Password validation
@@ -146,4 +144,5 @@ STATICFILES_DIRS = [
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/proyectos/'
+LOGOUT_REDIRECT_URL = '/'
 

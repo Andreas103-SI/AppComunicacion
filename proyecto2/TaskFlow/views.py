@@ -1,4 +1,3 @@
-from django.shortcuts import render
 # Importaciones de Django
 from django.db import models
 from django.db.models import Q
@@ -227,11 +226,32 @@ class MensajeListView(LoginRequiredMixin, ListView):
             models.Q(usuario_receptor=self.request.user) | 
             models.Q(usuario_emisor=self.request.user)
         ).order_by('-fecha_envio')
-        
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['proyecto_id'] = self.kwargs.get('proyecto_id')
         return context
+    
+    def get_queryset(self):
+        proyecto_id = self.kwargs.get('proyecto_id')
+        if proyecto_id:
+            proyecto = get_object_or_404(Proyecto, id=proyecto_id)
+            grupos = proyecto.grupos.all()
+            queryset = Mensaje.objects.filter(
+                models.Q(grupo__in=grupos) | 
+                models.Q(usuario_receptor=self.request.user) | 
+                models.Q(usuario_emisor=self.request.user)
+            ).order_by('-fecha_envio')
+            print(f"Queryset para proyecto {proyecto_id}: {queryset}")
+            return queryset
+        queryset = Mensaje.objects.filter(
+            models.Q(usuario_receptor=self.request.user) | 
+            models.Q(usuario_emisor=self.request.user)
+        ).order_by('-fecha_envio')
+        print(f"Queryset general: {queryset}")
+        return queryset
+    
+
     
 # Vista para crear un mensaje (individual o grupal)
 class MensajeCreateView(LoginRequiredMixin, CreateView):
