@@ -74,7 +74,6 @@ class ProyectoDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
         return Proyecto.objects.all()
 
 
-
 class TareaListView(LoginRequiredMixin, ListView):
     model = Tarea
     template_name = 'tareas/tarea_list.html'
@@ -85,11 +84,11 @@ class TareaListView(LoginRequiredMixin, ListView):
         if proyecto_id:
             proyecto = get_object_or_404(Proyecto, id=proyecto_id)
             if self.request.user.is_superuser or self.request.user.is_staff:
-                return Tarea.objects.filter(proyecto_id=proyecto_id)
+                return Tarea.objects.filter(proyecto_id=proyecto_id).prefetch_related('comentarios')
             elif self.request.user.is_authenticated:
                 q1 = models.Q(asignado_a=self.request.user)
                 q2 = models.Q(usuarios_asignados=self.request.user)
-                return Tarea.objects.filter(proyecto_id=proyecto_id).filter(q1 | q2)
+                return Tarea.objects.filter(proyecto_id=proyecto_id).filter(q1 | q2).prefetch_related('comentarios')
             else:
                 return Tarea.objects.none()
         return Tarea.objects.none()
@@ -97,10 +96,9 @@ class TareaListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         proyecto_id = self.kwargs.get('proyecto_id')
-        context['proyecto_id'] = proyecto_id
         if proyecto_id:
             context['proyecto'] = get_object_or_404(Proyecto, id=proyecto_id)
-        return context    
+        return context
 
 class TareaDetailView(DetailView):
     model = Tarea

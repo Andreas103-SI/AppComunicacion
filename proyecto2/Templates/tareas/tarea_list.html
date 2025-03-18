@@ -5,8 +5,19 @@
 <ul>
     {% for tarea in tareas %}
         <li>
-            {{ tarea.nombre }}
-            <a href="{% url 'tarea_detalle' tarea.id %}">Ver Detalles</a>
+            <h3>{{ tarea.nombre }}</h3>
+            <p>Descripción: {{ tarea.descripcion }}</p>
+            <h4>Comentarios</h4>
+            <ul>
+                {% for comentario in tarea.comentarios.all %}
+                    <li>{{ comentario.usuario }} - {{ comentario.fecha_creacion }}: {{ comentario.contenido }}</li>
+                {% empty %}
+                    <li>No hay comentarios.</li>
+                {% endfor %}
+            </ul>
+            {% if user.is_authenticated %}
+                <a href="{% url 'comentario_crear' tarea.id %}">Agregar Comentario</a>
+            {% endif %}
         </li>
     {% empty %}
         <li>No hay tareas para este proyecto.</li>
