@@ -1,6 +1,8 @@
 from django.shortcuts import render
 # Importaciones de Django
 from django.db import models
+from django.db.models import Q
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
