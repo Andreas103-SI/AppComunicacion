@@ -24,7 +24,10 @@ from .views import (
 
     # Vistas de Mensajes
     MensajeListView,
-    MensajeCreateView
+    MensajeCreateView,
+    MensajeReplyCreateView,
+    MensajeDeleteView
+
 )
 
 
@@ -54,6 +57,10 @@ urlpatterns = [
     # Mensajes
     path('mensajes/', MensajeListView.as_view(), name='mensajes'),
     path('mensajes/crear/', MensajeCreateView.as_view(), name='mensaje_crear'),
+    path('proyectos/<int:proyecto_id>/mensajes/<int:mensaje_id>/responder/', MensajeReplyCreateView.as_view(), name='mensaje_responder'),
+    path('proyectos/<int:proyecto_id>/mensajes/<int:mensaje_id>/eliminar/', MensajeDeleteView.as_view(), name='mensaje_eliminar'),
+
+
 
     # Mensajes por proyecto
     path('proyectos/<int:proyecto_id>/mensajes/', MensajeListView.as_view(), name='mensajes_proyecto'),

@@ -8,10 +8,21 @@
 <ul>
     {% for mensaje in mensajes %}
         <li>
-            De: {{ mensaje.usuario_emisor }} | 
-            Para: {% if mensaje.usuario_receptor %}{{ mensaje.usuario_receptor }}{% else %}{{ mensaje.grupo }}{% endif %} | 
+            De: {{ mensaje.usuario_emisor }} |
+            Para: {% if mensaje.usuario_receptor %}{{ mensaje.usuario_receptor }}{% else %}{{ mensaje.grupo }}{% endif %} |
             {{ mensaje.fecha_envio }}
             <p>{{ mensaje.contenido }}</p>
+            
+            {% if mensaje.usuario_receptor == user %}
+                <a href="{% url 'mensaje_responder' proyecto_id=proyecto.id mensaje_id=mensaje.id %}">Responder</a>
+            {% endif %}
+            
+            {% if mensaje.usuario_emisor == user or user.is_superuser %}
+                <form action="{% url 'mensaje_eliminar' proyecto_id=proyecto.id mensaje_id=mensaje.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">Eliminar</button>
+                </form>
+            {% endif %}
         </li>
     {% empty %}
         <li>No tienes mensajes.</li>

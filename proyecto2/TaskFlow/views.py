@@ -6,8 +6,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.edit import DeleteView
-
-
+from django.views.generic import View
 from django.urls import reverse_lazy
 from django.http import Http404, HttpResponseRedirect
 
@@ -18,7 +17,6 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from .models import Proyecto, Tarea, Comentario, Mensaje, Notificacion
 from .forms import RegistroForm, ProyectoForm, ComentarioForm, MensajeForm, TareaForm
 from .mixins import AdminRequiredMixin
-
 
 
 
@@ -216,13 +214,13 @@ class MensajeListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         proyecto_id = self.kwargs.get('proyecto_id')
-        if proyecto_id:
-            return Mensaje.objects.filter(proyecto_id=proyecto_id)
-        return Mensaje.objects.all()
+        return Mensaje.objects.filter(
+            Q(usuario_receptor=self.request.user) | Q(usuario_emisor=self.request.user),
+            grupo__proyecto_id=proyecto_id
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Pasar el proyecto_id al contexto para usarlo en la plantilla
         context['proyecto_id'] = self.kwargs.get('proyecto_id')
         return context
 
@@ -235,31 +233,44 @@ class MensajeCreateView(LoginRequiredMixin, CreateView):
     template_name = 'mensajes/mensaje_form.html'
 
     def form_valid(self, form):
-        # Asignar el usuario autenticado como el emisor del mensaje
         form.instance.usuario_emisor = self.request.user
-
-        # Asignar el proyecto si lo hay
         proyecto_id = self.kwargs.get('proyecto_id')
-        if proyecto_id:
-            proyecto = Proyecto.objects.get(id=proyecto_id)
-            form.instance.proyecto = proyecto
-        
-        # Guardar el mensaje
+        grupo = Grupo.objects.get(proyecto_id=proyecto_id)
+        form.instance.grupo = grupo
         return super().form_valid(form)
 
     def get_success_url(self):
-        # Redirigir a los mensajes del proyecto
         proyecto_id = self.kwargs.get('proyecto_id')
-        if proyecto_id:
-            return reverse_lazy('mensajes_proyecto', kwargs={'proyecto_id': proyecto_id})
-        return reverse_lazy('mensajes')
+        return reverse('mensajes_proyecto', kwargs={'proyecto_id': proyecto_id})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        proyecto_id = self.kwargs.get('proyecto_id')
-        if proyecto_id:
-            context['proyecto_id'] = proyecto_id
+        context['proyecto_id'] = self.kwargs.get('proyecto_id')
         return context
+
+class MensajeReplyCreateView(LoginRequiredMixin, CreateView):
+    model = Mensaje
+    form_class = MensajeForm
+    template_name = 'mensajes/mensaje_reply_form.html'
+
+    def form_valid(self, form):
+        mensaje_original = get_object_or_404(Mensaje, id=self.kwargs['mensaje_id'])
+        form.instance.usuario_emisor = self.request.user
+        form.instance.usuario_receptor = mensaje_original.usuario_emisor
+        form.instance.grupo = mensaje_original.grupo
+        form.instance.contenido = f"Respuesta: {form.instance.contenido}"
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('mensajes_proyecto', kwargs={'proyecto_id': self.kwargs['proyecto_id']})
+
+class MensajeDeleteView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        mensaje = get_object_or_404(Mensaje, id=self.kwargs['mensaje_id'])
+        if mensaje.usuario_emisor == request.user or request.user.is_superuser:
+            mensaje.delete()
+        return redirect('mensajes_proyecto', proyecto_id=self.kwargs['proyecto_id'])
+
 
 #Comentario
 
