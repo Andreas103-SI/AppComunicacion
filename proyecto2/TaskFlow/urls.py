@@ -16,6 +16,7 @@ from .views import (
     TareaDetailView,
     TareaUpdateView,
     TareaDeleteView,
+    tarea_actualizar_estado,
 
     # Vistas de Comentarios y Notificaciones
     ComentarioCreateView,
@@ -47,6 +48,7 @@ urlpatterns = [
     path('tareas/<int:pk>/eliminar/', TareaDeleteView.as_view(), name='tarea_eliminar'),
     path('proyectos/<int:proyecto_id>/tareas/', TareaListView.as_view(), name='tarea_list'),
     path('proyectos/<int:proyecto_id>/tareas/crear/', TareaCreateView.as_view(), name='tarea_crear'),
+    path('tareas/<int:tarea_id>/actualizar_estado/', tarea_actualizar_estado, name='tarea_actualizar_estado'),
 
     # ---------------- COMENTARIOS ----------------
     path('tareas/<int:tarea_id>/comentarios/crear/', ComentarioCreateView.as_view(), name='comentario_crear'),

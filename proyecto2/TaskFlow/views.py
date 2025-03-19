@@ -382,7 +382,7 @@ class NotificacionesView(LoginRequiredMixin, ListView):
         
 
 
-
+# Marcar notificación como leída
 @login_required
 def marcar_notificacion_leida(request, notificacion_id):
     if request.method == 'POST':
@@ -401,3 +401,22 @@ def marcar_notificacion_leida(request, notificacion_id):
             print(f"Error inesperado: {str(e)}")
             messages.error(request, f"Error al marcar la notificación: {str(e)}")  # Usa 'messages'
     return redirect(reverse_lazy('notificaciones'))
+
+# Actualizar estado de tarea
+@login_required
+def tarea_actualizar_estado(request, tarea_id):
+    tarea = get_object_or_404(Tarea, id=tarea_id)
+    if not (request.user.is_superuser or request.user.is_staff):
+        messages.error(request, "No tienes permiso para actualizar el estado de esta tarea.")
+        return redirect(reverse_lazy('tarea_list', kwargs={'proyecto_id': tarea.proyecto.id}))
+    
+    if request.method == 'POST':
+        estado = request.POST.get('estado')
+        if estado in dict(Tarea.ESTADOS).keys():
+            tarea.estado = estado
+            tarea.save()
+            messages.success(request, f"Estado de la tarea '{tarea.nombre}' actualizado a {tarea.get_estado_display()}.")
+        else:
+            messages.error(request, "Estado inválido.")
+    
+    return redirect(reverse_lazy('tarea_list', kwargs={'proyecto_id': tarea.proyecto.id}))

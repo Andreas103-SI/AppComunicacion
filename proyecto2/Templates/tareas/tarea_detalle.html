@@ -9,6 +9,18 @@
         <div class="card-body">
             <h5>Descripción:</h5>
             <p class="text-muted">{{ tarea.descripcion }}</p>
+            <h5>Fecha Límite:</h5>
+            <p class="text-muted">{{ tarea.fecha_limite|date:"d/m/Y" }}</p>
+            <h5>Estado:</h5>
+            <p>
+                {% if tarea.estado == 'pendiente' %}
+                    <span class="badge bg-warning text-dark">{{ tarea.get_estado_display }}</span>
+                {% elif tarea.estado == 'en_progreso' %}
+                    <span class="badge bg-info">{{ tarea.get_estado_display }}</span>
+                {% elif tarea.estado == 'completada' %}
+                    <span class="badge bg-success">{{ tarea.get_estado_display }}</span>
+                {% endif %}
+            </p>
         </div>
     </div>
 
