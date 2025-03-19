@@ -146,3 +146,7 @@ Thumbs.db # Windows
 
 # Ignorar archivos de intercambio de editores de texto
 *.swp
+
+
+# Ignorar archivos estáticos recolectados
+/staticfiles/

@@ -21,3 +21,6 @@ __pycache__/
 # Ignorar archivos específicos del sistema operativo (opcional)
 .DS_Store # macOS
 Thumbs.db # Windows
+
+# Ignorar archivos estáticos recolectados
+/staticfiles/

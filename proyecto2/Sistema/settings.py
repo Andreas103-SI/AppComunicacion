@@ -141,8 +141,11 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),  # Esto buscará los archivos estáticos en la raíz a nivel de proyecto.
 ]
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/proyectos/'
 LOGOUT_REDIRECT_URL = '/'
+
 
