@@ -21,7 +21,6 @@ from .views import (
     # Vistas de Comentarios y Notificaciones
     ComentarioCreateView,
     NotificacionesView,
-    NotificacionesView, 
     marcar_notificacion_leida_no_leida, 
     eliminar_notificacion,
 
@@ -30,8 +29,6 @@ from .views import (
     MensajeCreateView,
     MensajeReplyCreateView,
     MensajeDeleteView,
-
-
 )
 
 urlpatterns = [
@@ -58,14 +55,11 @@ urlpatterns = [
     path('tareas/<int:tarea_id>/comentarios/crear/', ComentarioCreateView.as_view(), name='comentario_crear'),
 
     # ---------------- MENSAJES ----------------
-    path('mensajes/', MensajeListView.as_view(), name='mensajes'),  # Todos los mensajes (si aplica)
-    path('mensajes/crear/', MensajeCreateView.as_view(), name='mensaje_crear'),
-
-    # Mensajes por proyecto
+    path('mensajes/', MensajeListView.as_view(), name='mensajes'),  # Todos los mensajes
     path('proyectos/<int:proyecto_id>/mensajes/', MensajeListView.as_view(), name='mensajes_proyecto'),
-    path('proyectos/<int:proyecto_id>/mensajes/crear/', MensajeCreateView.as_view(), name='mensaje_crear_proyecto'),
-    path('proyectos/<int:proyecto_id>/mensajes/<int:mensaje_id>/responder/', MensajeReplyCreateView.as_view(), name='mensaje_responder'),
-    path('proyectos/<int:proyecto_id>/mensajes/<int:mensaje_id>/eliminar/', MensajeDeleteView.as_view(), name='mensaje_eliminar'),
+    path('mensajes/nuevo/<int:proyecto_id>/', MensajeCreateView.as_view(), name='mensaje_create'),
+    path('mensajes/responder/<int:proyecto_id>/<int:mensaje_id>/', MensajeReplyCreateView.as_view(), name='mensaje_reply'),
+    path('mensajes/eliminar/<int:proyecto_id>/<int:mensaje_id>/', MensajeDeleteView.as_view(), name='mensaje_delete'),
 
     # ---------------- NOTIFICACIONES ----------------
     path('notificaciones/', NotificacionesView.as_view(), name='notificaciones'),

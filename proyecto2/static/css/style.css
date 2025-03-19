@@ -137,3 +137,83 @@ footer {
         width: 100%;
     }
 }
+/* Estilos para los mensajes */
+.messages-list {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.card.sent-message {
+    background-color: #e3f2fd; /* Fondo azul claro para mensajes enviados */
+    border-left: 4px solid #007bff; /* Borde azul para mensajes enviados */
+}
+
+.card.received-message {
+    background-color: #f8f9fa; /* Fondo gris claro para mensajes recibidos */
+    border-left: 4px solid #6c757d; /* Borde gris para mensajes recibidos */
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.card-body {
+    font-size: 1rem;
+    color: #333;
+}
+
+/* Ajustar el espaciado de los botones */
+.btn-group .btn {
+    margin-left: 5px;
+}
+
+/* Estilo para el botón de nuevo mensaje */
+.btn-custom {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-custom:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo para el botón de eliminar */
+.btn-danger {
+    background-color: #dc3545;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* Responsividad */
+@media (max-width: 576px) {
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn-group {
+        margin-top: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-group .btn {
+        margin-left: 0;
+        margin-top: 5px;
+        width: 100%;
+    }
+}

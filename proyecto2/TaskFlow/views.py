@@ -308,7 +308,6 @@ class MensajeCreateView(LoginRequiredMixin, CreateView):
                     usuarios_notificados.add(usuario)
 
         return response
-
     
 # Vista para responder a un mensaje
 class MensajeReplyCreateView(LoginRequiredMixin, CreateView):
@@ -371,14 +370,28 @@ class MensajeReplyCreateView(LoginRequiredMixin, CreateView):
         return response    
     
 # Vista para eliminar un mensaje                                  
-class MensajeDeleteView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        mensaje = get_object_or_404(Mensaje, id=self.kwargs['mensaje_id'])
-        if mensaje.usuario_emisor == request.user or request.user.is_superuser:
-            mensaje.delete()
-        return redirect('mensajes_proyecto', proyecto_id=self.kwargs['proyecto_id'])
+class MensajeDeleteView(LoginRequiredMixin, DeleteView):
+    model = Mensaje
+    template_name = 'mensajes/mensaje_confirm_delete.html'
+    pk_url_kwarg = 'mensaje_id'
 
+    def get_success_url(self):
+        proyecto_id = self.kwargs.get('proyecto_id')
+        return reverse_lazy('mensajes_proyecto', kwargs={'proyecto_id': proyecto_id}) if proyecto_id else reverse_lazy('mensajes')
 
+    def get_queryset(self):
+        # Permitir eliminar mensajes al emisor, receptor, o un administrador
+        queryset = super().get_queryset()
+        if self.request.user.is_superuser:
+            return queryset
+        return queryset.filter(
+            usuario_emisor=self.request.user
+        ) | queryset.filter(
+            usuario_receptor=self.request.user
+        ) | queryset.filter(
+            grupo__usuarios=self.request.user
+        )        
+    
 #Comentario
 
 

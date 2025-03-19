@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Eliminar Mensaje</h1>
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <p>¿Estás seguro de que deseas eliminar este mensaje?</p>
+            <p><strong>De:</strong> {{ object.usuario_emisor.username }} | <strong>Para:</strong> {% if object.usuario_receptor %}{{ object.usuario_receptor.username }}{% else %}{{ object.grupo.nombre }}{% endif %}</p>
+            <p>{{ object.contenido }}</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+                <a href="{% url 'mensajes_proyecto' proyecto_id=proyecto_id %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

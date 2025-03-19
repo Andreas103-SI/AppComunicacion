@@ -1,32 +1,62 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="text-center mb-4">Mensajes {% if proyecto_id %}del Proyecto{% endif %}</h1>
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-{% endif %}
-<div class="card">
-    <div class="card-body">
-        {% if user.is_authenticated and proyecto_id %}
-            <a href="{% url 'mensaje_crear_proyecto' proyecto_id %}" class="btn btn-custom mb-3">Enviar Mensaje</a>
-        {% endif %}
-        <ul class="list-unstyled">
-            {% for mensaje in mensajes %}
-                <li class="border-bottom py-2">
-                    <strong>De:</strong> {{ mensaje.usuario_emisor }} | 
-                    <strong>Para:</strong> {% if mensaje.usuario_receptor %}{{ mensaje.usuario_receptor }}{% else %}{% if mensaje.grupo %}{{ mensaje.grupo.nombre }}{% else %}Sin grupo{% endif %}{% endif %} | 
-                    {{ mensaje.fecha_envio }}
-                    <p>{{ mensaje.contenido }}</p>
-                    {% if user.is_authenticated and mensaje.grupo %}
-                        <a href="{% url 'mensaje_responder' proyecto_id=mensaje.grupo.proyecto.id mensaje_id=mensaje.id %}" class="btn btn-sm btn-custom">Responder</a>
-                    {% endif %}
-                </li>
-            {% empty %}
-                <li>No tienes mensajes.</li>
-            {% endfor %}
-        </ul>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Mensajes</h1>
+
+    <!-- Botón para enviar un nuevo mensaje (solo si hay un proyecto_id) -->
+    {% if proyecto_id %}
+    <div class="text-end mb-4">
+        <a href="{% url 'mensaje_create' proyecto_id=proyecto_id %}" class="btn btn-custom">
+            <i class="fas fa-plus"></i> Enviar Nuevo Mensaje
+        </a>
     </div>
+    {% endif %}
+
+    <!-- Lista de mensajes -->
+    {% if mensajes %}
+        <div class="messages-list">
+            {% for mensaje in mensajes %}
+                <div class="card mb-3 shadow-sm {% if mensaje.usuario_emisor == user %}sent-message{% else %}received-message{% endif %}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>De:</strong> {{ mensaje.usuario_emisor.username }} |
+                            <strong>Para:</strong>
+                            {% if mensaje.usuario_receptor %}
+                                {{ mensaje.usuario_receptor.username }}
+                            {% elif mensaje.grupo %}
+                                {{ mensaje.grupo.nombre }}
+                            {% else %}
+                                Todos
+                            {% endif %} |
+                            {{ mensaje.fecha_envio|date:"d \d\e F \d\e Y \a \l\a\s H:i" }}
+                        </div>
+                        <!-- Botones para responder y eliminar (solo si hay un proyecto_id) -->
+                        {% if proyecto_id %}
+                        <div class="btn-group">
+                            <a href="{% url 'mensaje_reply' proyecto_id=proyecto_id mensaje_id=mensaje.id %}" class="btn btn-sm btn-custom">
+                                <i class="fas fa-reply"></i> Responder
+                            </a>
+                            <!-- Botón de eliminar -->
+                            {% if mensaje.usuario_emisor == user or mensaje.usuario_receptor == user or user in mensaje.grupo.usuarios.all or user.is_superuser %}
+                                <form method="post" action="{% url 'mensaje_delete' proyecto_id=proyecto_id mensaje_id=mensaje.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este mensaje?')">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">{{ mensaje.contenido }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-muted">No tienes mensajes.</p>
+    {% endif %}
 </div>
 {% endblock %}
