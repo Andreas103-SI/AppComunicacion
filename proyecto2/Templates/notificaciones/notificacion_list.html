@@ -1,20 +1,46 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Notificaciones</h1>
-<ul>
-    {% for notificacion in notificaciones %}
-        <li>
-            {{ notificacion.mensaje }} - {{ notificacion.fecha }} 
-            {% if not notificacion.leida %}
-                (<a href="{% url 'marcar_notificacion_leida' notificacion.id %}">Marcar como leída</a>)
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Notificaciones</h1>
+
+    <!-- Mostrar mensajes de éxito o error -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Lista de notificaciones -->
+    <div class="card shadow-lg">
+        <div class="card-body">
+            {% if notificaciones %}
+                <ul class="list-unstyled">
+                    {% for notificacion in notificaciones %}
+                        <li class="border-bottom py-2">
+                            {{ notificacion.mensaje }} - {{ notificacion.fecha|date:"d/m/Y H:i" }}
+                            {% if not notificacion.leida %}
+                                <form method="post" action="{% url 'marcar_notificacion_leida' notificacion.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-custom ms-2">Marcar como leída</button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted ms-2">(Leída)</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
             {% else %}
-                (Leída)
+                <p class="text-center text-muted">No tienes notificaciones.</p>
             {% endif %}
-        </li>
-    {% empty %}
-        <li>No tienes notificaciones.</li>
-    {% endfor %}
-</ul>
-<a href="{% url 'home' %}">Volver al Inicio</a>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'home' %}" class="btn btn-secondary">Volver al Inicio</a>
+    </div>
+</div>
 {% endblock %}

@@ -1,18 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Proyectos</h1>
-<ul>
-    {% for proyecto in proyectos %}
-        <li>{{ proyecto.nombre }}
-            <a href="{% url 'proyecto_detalle' proyecto.id %}">Ver Detalles</a>
-        </li>
-    {% empty %}
-        <li>No hay proyectos disponibles.</li>
-    {% endfor %}
-</ul>
-{% if user.is_authenticated and user.is_superuser %}
-    <a href="{% url 'proyecto_crear' %}">Crear Proyecto</a>  <!-- Asegúrate de que esta URL esté definida -->
-{% endif %}
-<a href="{% url 'home' %}">Volver al Inicio</a>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Proyectos</h1>
+
+    <!-- Lista de proyectos -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            {% if proyectos %}
+                <ul class="list-unstyled">
+                    {% for proyecto in proyectos %}
+                        <li class="border-bottom py-2 d-flex justify-content-between align-items-center">
+                            <span>{{ proyecto.nombre }}</span>
+                            <a href="{% url 'proyecto_detalle' proyecto.id %}" class="btn btn-sm btn-custom">Ver Detalles</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-center text-muted">No hay proyectos disponibles.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="text-center d-flex justify-content-center gap-2">
+        {% if user.is_authenticated and user.is_superuser %}
+            <a href="{% url 'proyecto_crear' %}" class="btn btn-success">Crear Proyecto</a>
+        {% endif %}
+        <a href="{% url 'home' %}" class="btn btn-secondary">Volver al Inicio</a>
+    </div>
+</div>
 {% endblock %}

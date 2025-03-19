@@ -1,27 +1,89 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Enviar Mensaje</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.receptor_type.label_tag }} {{ form.receptor_type }}
-    {% if form.receptor_type.value == 'user' or form.receptor_type.value == '' %}
-        {{ form.usuario_receptor.label_tag }} {{ form.usuario_receptor }}
-    {% elif form.receptor_type.value == 'group' %}
-        {{ form.grupo.label_tag }} {{ form.grupo }}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Enviar Mensaje</h1>
+
+    <!-- Mostrar mensajes de éxito o error -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
     {% endif %}
-    {{ form.contenido.label_tag }} {{ form.contenido }}
-    <button type="submit">Enviar</button>
-</form>
-<a href="{% url 'mensajes_proyecto' proyecto_id %}">Volver a Mensajes</a>
+
+    <!-- Formulario de mensaje -->
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <form method="post" id="mensajeForm">
+                {% csrf_token %}
+                <!-- Receptor Type -->
+                <div class="mb-3">
+                    <label class="form-label">{{ form.receptor_type.label }}</label>
+                    <div class="d-flex gap-3">
+                        {{ form.receptor_type }}
+                    </div>
+                    {% if form.receptor_type.errors %}
+                        <div class="text-danger">{{ form.receptor_type.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Campos condicionales -->
+                <div id="usuarioReceptorField" class="mb-3 {% if form.receptor_type.value == 'group' %}d-none{% endif %}">
+                    <label for="{{ form.usuario_receptor.id_for_label }}" class="form-label">{{ form.usuario_receptor.label }}</label>
+                    {{ form.usuario_receptor }}
+                    {% if form.usuario_receptor.errors %}
+                        <div class="text-danger">{{ form.usuario_receptor.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div id="grupoField" class="mb-3 {% if form.receptor_type.value != 'group' %}d-none{% endif %}">
+                    <label for="{{ form.grupo.id_for_label }}" class="form-label">{{ form.grupo.label }}</label>
+                    {{ form.grupo }}
+                    {% if form.grupo.errors %}
+                        <div class="text-danger">{{ form.grupo.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Contenido -->
+                <div class="mb-3">
+                    <label for="{{ form.contenido.id_for_label }}" class="form-label">{{ form.contenido.label }}</label>
+                    {{ form.contenido }}
+                    {% if form.contenido.errors %}
+                        <div class="text-danger">{{ form.contenido.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-custom">Enviar Mensaje</button>
+                    <a href="{% url 'mensajes_proyecto' proyecto_id %}" class="btn btn-secondary">Volver a Mensajes</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block script %}
 <script>
-    document.querySelectorAll('input[name="receptor_type"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const form = document.querySelector('form');
-            form.submit(); // Recarga la página para actualizar los campos visibles
+    document.addEventListener('DOMContentLoaded', function() {
+        const receptorTypeRadios = document.querySelectorAll('input[name="receptor_type"]');
+        const usuarioReceptorField = document.getElementById('usuarioReceptorField');
+        const grupoField = document.getElementById('grupoField');
+
+        receptorTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'user') {
+                    usuarioReceptorField.classList.remove('d-none');
+                    grupoField.classList.add('d-none');
+                } else if (this.value === 'group') {
+                    usuarioReceptorField.classList.add('d-none');
+                    grupoField.classList.remove('d-none');
+                }
+            });
         });
     });
 </script>

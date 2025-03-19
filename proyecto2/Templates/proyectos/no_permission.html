@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h1>Acceso Denegado</h1>
-<p>{{ message }}</p>
-<a href="{% url 'proyectos' %}">Volver a la lista de proyectos</a>
+<div class="container mt-5">
+    <h1 class="text-center mb-4 text-danger">Acceso Denegado</h1>
+    <div class="card shadow-lg text-center">
+        <div class="card-body">
+            <p class="text-muted">{{ message }}</p>
+            <a href="{% url 'proyectos' %}" class="btn btn-secondary mt-3">Volver a la lista de proyectos</a>
+        </div>
+    </div>
+</div>
 {% endblock %}

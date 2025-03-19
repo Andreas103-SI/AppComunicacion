@@ -1,30 +1,52 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Tareas {% if proyecto %}de {{ proyecto.nombre }}{% endif %}</h1>
-<ul>
-    {% for tarea in tareas %}
-        <li>
-            <h3>{{ tarea.nombre }}</h3>
-            <p>Descripción: {{ tarea.descripcion }}</p>
-            <h4>Comentarios</h4>
-            <ul>
-                {% for comentario in tarea.comentarios.all %}
-                    <li>{{ comentario.usuario }} - {{ comentario.fecha_creacion }}: {{ comentario.contenido }}</li>
-                {% empty %}
-                    <li>No hay comentarios.</li>
-                {% endfor %}
-            </ul>
-            {% if user.is_authenticated %}
-                <a href="{% url 'comentario_crear' tarea.id %}">Agregar Comentario</a>
+<div class="container mt-5">
+    <h1 class="text-center mb-4 display-4 text-primary">Tareas {% if proyecto %}<span class="fw-bold">{{ proyecto.nombre }}</span>{% endif %}</h1>
+
+    <!-- Lista de tareas -->
+    <div class="card shadow-lg mb-5 border-0">
+        <div class="card-body">
+            {% if tareas %}
+                <ul class="list-group list-group-flush">
+                    {% for tarea in tareas %}
+                        <li class="list-group-item py-4">
+                            <h3 class="fw-bold text-secondary">{{ tarea.nombre }}</h3>
+                            <p><strong>Descripción:</strong> {{ tarea.descripcion }}</p>
+                            <div class="mt-3">
+                                <h5 class="text-dark">Comentarios</h5>
+                                <ul class="list-group mt-2">
+                                    {% for comentario in tarea.comentarios.all %}
+                                        <li class="list-group-item">
+                                            <div class="d-flex justify-content-between">
+                                                <span><strong>{{ comentario.usuario }}</strong></span>
+                                                <small class="text-muted">{{ comentario.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                                            </div>
+                                            <p class="mb-0">{{ comentario.contenido }}</p>
+                                        </li>
+                                    {% empty %}
+                                        <li class="list-group-item text-muted">No hay comentarios.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'comentario_crear' tarea.id %}" class="btn btn-primary btn-sm mt-3">Agregar Comentario</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-center text-muted">No hay tareas para este proyecto.</p>
             {% endif %}
-        </li>
-    {% empty %}
-        <li>No hay tareas para este proyecto.</li>
-    {% endfor %}
-</ul>
-{% if user.is_authenticated and user.is_superuser %}
-<a href="{% url 'tarea_crear' proyecto_id=proyecto.id %}">Crear Tarea</a>
-{% endif %}
-<a href="{% url 'proyectos' %}">Volver a Proyectos</a>
+        </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="d-flex justify-content-center gap-3">
+        {% if user.is_authenticated and user.is_superuser %}
+            <a href="{% url 'tarea_crear' proyecto_id=proyecto.id %}" class="btn btn-success px-4">Crear Tarea</a>
+        {% endif %}
+        <a href="{% url 'proyectos' %}" class="btn btn-secondary px-4">Volver a Proyectos</a>
+    </div>
+</div>
 {% endblock %}

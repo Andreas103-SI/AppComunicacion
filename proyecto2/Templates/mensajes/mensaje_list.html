@@ -1,28 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Mensajes {% if proyecto_id %}del Proyecto{% endif %}</h1>
-{% if user.is_authenticated %}
-    {% if proyecto_id %}
-        <a href="{% url 'mensaje_crear_proyecto' proyecto_id %}">Enviar Mensaje</a>
-    {% endif %}
-{% endif %}
-<ul>
-    {% for mensaje in mensajes %}
-        <li>
-            De: {{ mensaje.usuario_emisor }} | 
-            Para: {% if mensaje.usuario_receptor %}{{ mensaje.usuario_receptor }}{% else %}{% if mensaje.grupo %}{{ mensaje.grupo.nombre }}{% else %}Sin grupo{% endif %}{% endif %} | 
-            {{ mensaje.fecha_envio }}
-            <p>{{ mensaje.contenido }}</p>
-            {% if user.is_authenticated %}
-                {% if mensaje.grupo %}
-                    <a href="{% url 'mensaje_responder' proyecto_id=mensaje.grupo.proyecto.id mensaje_id=mensaje.id %}">Responder</a>
-                {% endif %}
-            {% endif %}
-        </li>
-    {% empty %}
-        <li>No tienes mensajes.</li>
+<h1 class="text-center mb-4">Mensajes {% if proyecto_id %}del Proyecto{% endif %}</h1>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
     {% endfor %}
-</ul>
-<a href="{% url 'home' %}">Volver al Inicio</a>
+{% endif %}
+<div class="card">
+    <div class="card-body">
+        {% if user.is_authenticated and proyecto_id %}
+            <a href="{% url 'mensaje_crear_proyecto' proyecto_id %}" class="btn btn-custom mb-3">Enviar Mensaje</a>
+        {% endif %}
+        <ul class="list-unstyled">
+            {% for mensaje in mensajes %}
+                <li class="border-bottom py-2">
+                    <strong>De:</strong> {{ mensaje.usuario_emisor }} | 
+                    <strong>Para:</strong> {% if mensaje.usuario_receptor %}{{ mensaje.usuario_receptor }}{% else %}{% if mensaje.grupo %}{{ mensaje.grupo.nombre }}{% else %}Sin grupo{% endif %}{% endif %} | 
+                    {{ mensaje.fecha_envio }}
+                    <p>{{ mensaje.contenido }}</p>
+                    {% if user.is_authenticated and mensaje.grupo %}
+                        <a href="{% url 'mensaje_responder' proyecto_id=mensaje.grupo.proyecto.id mensaje_id=mensaje.id %}" class="btn btn-sm btn-custom">Responder</a>
+                    {% endif %}
+                </li>
+            {% empty %}
+                <li>No tienes mensajes.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
 {% endblock %}

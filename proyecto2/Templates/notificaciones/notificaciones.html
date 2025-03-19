@@ -1,29 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Mis Notificaciones</h2>
+<h2 class="text-center mb-4">Mis Notificaciones</h2>
 {% if messages %}
     {% for message in messages %}
         <div class="alert alert-{{ message.tags }}">{{ message }}</div>
     {% endfor %}
 {% endif %}
 {% if notificaciones %}
-    <ul>
-        {% for notificacion in notificaciones %}
-            <li>
-                {{ notificacion.mensaje }} - {{ notificacion.fecha|date:"d/m/Y H:i" }} | 
-                Leída: {{ notificacion.leida }}
-                {% if not notificacion.leida %}
-                    <form method="post" action="{% url 'marcar_notificacion_leida' notificacion.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit">Marcar como leída</button>
-                    </form>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="card">
+        <div class="card-body">
+            <ul class="list-unstyled">
+                {% for notificacion in notificaciones %}
+                    <li class="border-bottom py-2">
+                        {{ notificacion.mensaje }} - {{ notificacion.fecha|date:"d/m/Y H:i" }} | 
+                        Leída: {{ notificacion.leida }}
+                        {% if not notificacion.leida %}
+                            <form method="post" action="{% url 'marcar_notificacion_leida' notificacion.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-custom">Marcar como leída</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
 {% else %}
-    <p>No tienes notificaciones no leídas.</p>
+    <p class="text-center text-muted">No tienes notificaciones no leídas.</p>
 {% endif %}
-<a href="{% url 'home' %}">Volver al Inicio</a>
 {% endblock %}

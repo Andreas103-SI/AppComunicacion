@@ -1,18 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ proyecto.nombre }}</h1>
-<p>Descripción: {{ proyecto.descripcion }}</p>
-<h2>Tareas</h2>
-<a href="{% url 'tarea_list' proyecto.id %}">Ver Tareas</a>
-{% if user.is_authenticated and user.is_staff %}
-    <a href="{% url 'tarea_crear' proyecto.id %}">Crear Tarea</a>
-    <a href="{% url 'proyecto_eliminar' proyecto.id %}" onclick="return confirm('¿Estás seguro?')">Eliminar Proyecto</a>
-{% endif %}
-<h2>Mensajes del Proyecto</h2>
-<a href="{% url 'mensajes_proyecto' proyecto.id %}">Ver Mensajes</a>
-{% if user.is_authenticated %}
-    <a href="{% url 'mensaje_crear_proyecto' proyecto.id %}">Enviar Mensaje</a>
-{% endif %}
-<a href="{% url 'proyectos' %}">Volver a Proyectos</a>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">{{ proyecto.nombre }}</h1>
+
+    <!-- Detalles del proyecto -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <h5>Descripción:</h5>
+            <p class="text-muted">{{ proyecto.descripcion }}</p>
+        </div>
+    </div>
+
+    <!-- Tareas -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">Tareas</h5>
+            <a href="{% url 'tarea_list' proyecto.id %}" class="btn btn-custom mb-2">Ver Tareas</a>
+            {% if user.is_authenticated and user.is_staff %}
+                <a href="{% url 'tarea_crear' proyecto.id %}" class="btn btn-success mb-2">Crear Tarea</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">Mensajes del Proyecto</h5>
+            <a href="{% url 'mensajes_proyecto' proyecto.id %}" class="btn btn-custom mb-2">Ver Mensajes</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'mensaje_crear_proyecto' proyecto.id %}" class="btn btn-primary mb-2">Enviar Mensaje</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="text-center mt-4 d-flex justify-content-center gap-2">
+        <a href="{% url 'proyectos' %}" class="btn btn-secondary">Volver a Proyectos</a>
+        {% if user.is_authenticated and user.is_staff %}
+            <a href="{% url 'proyecto_eliminar' proyecto.id %}" class="btn btn-danger" onclick="return confirm('¿Estás seguro?')">Eliminar Proyecto</a>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

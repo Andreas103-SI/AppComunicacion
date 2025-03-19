@@ -1,11 +1,17 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Eliminar Proyecto</h1>
-<p>¿Estás seguro de que quieres eliminar el proyecto "{{ proyecto.nombre }}"?</p>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Confirmar</button>
-</form>
-<a href="{% url 'proyecto_detalle' proyecto.id %}">Cancelar</a>
+<div class="container mt-5">
+    <h1 class="text-center mb-4 text-danger">Eliminar Proyecto</h1>
+    <div class="card shadow-lg text-center">
+        <div class="card-body">
+            <p>¿Estás seguro de que quieres eliminar el proyecto <strong>"{{ proyecto.nombre }}"</strong>?</p>
+            <form method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Confirmar</button>
+            </form>
+            <a href="{% url 'proyecto_detalle' proyecto.id %}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </div>
+</div>
 {% endblock %}

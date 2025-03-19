@@ -1,18 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ tarea.nombre }}</h1>
-<p>Descripción: {{ tarea.descripcion }}</p>
-<h2>Comentarios</h2>
-<ul>
-    {% for comentario in tarea.comentarios.all %}
-        <li>{{ comentario.usuario }} - {{ comentario.fecha_creacion }}: {{ comentario.contenido }}</li>
-    {% empty %}
-        <li>No hay comentarios.</li>
-    {% endfor %}
-</ul>
-{% if user.is_authenticated %}
-    <a href="{% url 'comentario_crear' tarea.id %}">Agregar Comentario</a>
-{% endif %}
-<a href="{% url 'tarea_list' tarea.proyecto.id %}">Volver a Tareas</a>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">{{ tarea.nombre }}</h1>
+
+    <!-- Detalles de la tarea -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <h5>Descripción:</h5>
+            <p class="text-muted">{{ tarea.descripcion }}</p>
+        </div>
+    </div>
+
+    <!-- Comentarios -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">Comentarios</h5>
+            {% if tarea.comentarios.all %}
+                <ul class="list-unstyled">
+                    {% for comentario in tarea.comentarios.all %}
+                        <li class="border-bottom py-2">
+                            <strong>{{ comentario.usuario }}</strong> - {{ comentario.fecha_creacion|date:"d/m/Y H:i" }}: 
+                            {{ comentario.contenido }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-center text-muted">No hay comentarios.</p>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'comentario_crear' tarea.id %}" class="btn btn-custom mt-3">Agregar Comentario</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Volver -->
+    <div class="text-center mt-4">
+        <a href="{% url 'tarea_list' tarea.proyecto.id %}" class="btn btn-secondary">Volver a Tareas</a>
+    </div>
+</div>
 {% endblock %}
