@@ -1,20 +1,29 @@
-{% extends "base.html" %}  <!-- Ajusta según tu plantilla base -->
+{% extends "base.html" %}
 
 {% block content %}
-  <h2>Mis Notificaciones</h2>
-  {% if notificaciones %}
+<h2>Mis Notificaciones</h2>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+{% if notificaciones %}
     <ul>
-      {% for notificacion in notificaciones %}
-        <li>
-          {{ notificacion.mensaje }} - {{ notificacion.fecha|date:"d/m/Y H:i" }}
-          <form method="post" action="{% url 'marcar_notificacion_leida' notificacion.id %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit">Marcar como leída</button>
-          </form>
-        </li>
-      {% endfor %}
+        {% for notificacion in notificaciones %}
+            <li>
+                {{ notificacion.mensaje }} - {{ notificacion.fecha|date:"d/m/Y H:i" }} | 
+                Leída: {{ notificacion.leida }}
+                {% if not notificacion.leida %}
+                    <form method="post" action="{% url 'marcar_notificacion_leida' notificacion.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">Marcar como leída</button>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
     </ul>
-  {% else %}
+{% else %}
     <p>No tienes notificaciones no leídas.</p>
-  {% endif %}
+{% endif %}
+<a href="{% url 'home' %}">Volver al Inicio</a>
 {% endblock %}

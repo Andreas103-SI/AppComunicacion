@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.edit import DeleteView
 from django.views.generic import View
+from django.contrib import messages
 from django.urls import reverse_lazy, reverse
 from django.http import Http404, HttpResponseRedirect
 
@@ -216,26 +217,6 @@ class MensajeListView(LoginRequiredMixin, ListView):
         proyecto_id = self.kwargs.get('proyecto_id')
         if proyecto_id:
             proyecto = get_object_or_404(Proyecto, id=proyecto_id)
-            grupos = proyecto.grupos.all()  # Obtiene todos los grupos del proyecto
-            return Mensaje.objects.filter(
-                models.Q(grupo__in=grupos) | 
-                models.Q(usuario_receptor=self.request.user) | 
-                models.Q(usuario_emisor=self.request.user)
-            ).order_by('-fecha_envio')
-        return Mensaje.objects.filter(
-            models.Q(usuario_receptor=self.request.user) | 
-            models.Q(usuario_emisor=self.request.user)
-        ).order_by('-fecha_envio')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['proyecto_id'] = self.kwargs.get('proyecto_id')
-        return context
-    
-    def get_queryset(self):
-        proyecto_id = self.kwargs.get('proyecto_id')
-        if proyecto_id:
-            proyecto = get_object_or_404(Proyecto, id=proyecto_id)
             grupos = proyecto.grupos.all()
             queryset = Mensaje.objects.filter(
                 models.Q(grupo__in=grupos) | 
@@ -250,6 +231,11 @@ class MensajeListView(LoginRequiredMixin, ListView):
         ).order_by('-fecha_envio')
         print(f"Queryset general: {queryset}")
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['proyecto_id'] = self.kwargs.get('proyecto_id')
+        return context
     
 
     
@@ -364,16 +350,19 @@ class ComentarioCreateView(LoginRequiredMixin, CreateView):
 
 class NotificacionesView(LoginRequiredMixin, ListView):
     model = Notificacion
-    template_name = 'notificaciones/notificaciones.html'
+    template_name = 'notificaciones/notificaciones.html'  # Ajusta según tu estructura
     context_object_name = 'notificaciones'
 
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return Notificacion.objects.filter(leida=False).order_by('-fecha')
-        return Notificacion.objects.filter(
-            usuario=self.request.user,
-            leida=False
-        ).order_by('-fecha')
+            queryset = Notificacion.objects.filter(leida=False).order_by('-fecha')
+        else:
+            queryset = Notificacion.objects.filter(
+                usuario=self.request.user,
+                leida=False
+            ).order_by('-fecha')
+        print(f"Notificaciones para {self.request.user}: {queryset}")
+        return queryset
         
 
 
@@ -381,7 +370,18 @@ class NotificacionesView(LoginRequiredMixin, ListView):
 @login_required
 def marcar_notificacion_leida(request, notificacion_id):
     if request.method == 'POST':
-        notificacion = get_object_or_404(Notificacion, id=notificacion_id, usuario=request.user)
-        notificacion.leida = True
-        notificacion.save()
-    return HttpResponseRedirect(reverse_lazy('notificaciones'))
+        try:
+            print(f"Intentando marcar notificación {notificacion_id} para el usuario {request.user}")
+            notificacion = get_object_or_404(Notificacion, id=notificacion_id, usuario=request.user)
+            print(f"Notificación encontrada: {notificacion}")
+            notificacion.leida = True
+            notificacion.save()
+            print("Notificación guardada correctamente")
+            messages.success(request, "Notificación marcada como leída.")  # Usa 'messages', no 'mensajes'
+        except Notificacion.DoesNotExist:
+            print(f"Notificación {notificacion_id} no encontrada o no pertenece al usuario {request.user}")
+            messages.error(request, "No tienes permiso para marcar esta notificación o no existe.")  # Usa 'messages'
+        except Exception as e:
+            print(f"Error inesperado: {str(e)}")
+            messages.error(request, f"Error al marcar la notificación: {str(e)}")  # Usa 'messages'
+    return redirect(reverse_lazy('notificaciones'))

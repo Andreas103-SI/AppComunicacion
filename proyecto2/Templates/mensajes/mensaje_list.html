@@ -3,10 +3,26 @@
 {% block content %}
 <h1>Mensajes {% if proyecto_id %}del Proyecto{% endif %}</h1>
 {% if user.is_authenticated %}
-    <a href="{% url 'mensaje_crear_proyecto' proyecto_id %}">Enviar Mensaje</a>
+    {% if proyecto_id %}
+        <a href="{% url 'mensaje_crear_proyecto' proyecto_id %}">Enviar Mensaje</a>
+    {% endif %}
 {% endif %}
 <ul>
     {% for mensaje in mensajes %}
         <li>
             De: {{ mensaje.usuario_emisor }} | 
-            Para: {% if mensaje.usuario_receptor %}{{ mensaje.usuario_receptor }}{% else %}{{ mensaje.grupo.nombre }}{%
+            Para: {% if mensaje.usuario_receptor %}{{ mensaje.usuario_receptor }}{% else %}{% if mensaje.grupo %}{{ mensaje.grupo.nombre }}{% else %}Sin grupo{% endif %}{% endif %} | 
+            {{ mensaje.fecha_envio }}
+            <p>{{ mensaje.contenido }}</p>
+            {% if user.is_authenticated %}
+                {% if mensaje.grupo %}
+                    <a href="{% url 'mensaje_responder' proyecto_id=mensaje.grupo.proyecto.id mensaje_id=mensaje.id %}">Responder</a>
+                {% endif %}
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>No tienes mensajes.</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'home' %}">Volver al Inicio</a>
+{% endblock %}
