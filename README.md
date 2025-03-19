@@ -1,68 +1,239 @@
+# Sistema de Comunicación Empresarial (TaskFlow)
+
+## Descripción
+
+**Sistema de Comunicación Empresarial** es una aplicación web desarrollada con Django que facilita la gestión de proyectos, tareas, mensajes y la colaboración entre usuarios dentro de una empresa. Permite a los usuarios crear proyectos, asignar tareas, enviar mensajes (individuales o grupales), recibir notificaciones en tiempo real, y colaborar de manera eficiente. La aplicación está diseñada para mejorar la comunicación y la productividad en equipos de trabajo.
+
+### Características principales
+
+- **Gestión de Proyectos**: Crear, editar, eliminar y visualizar proyectos con fechas de inicio y fin, estado (Activo, Finalizado, Cancelado) y miembros asociados.
+- **Gestión de Tareas**: Crear, editar, eliminar y actualizar el estado de las tareas (Pendiente, En Progreso, En Revisión, Completada) dentro de un proyecto.
+- **Mensajería**: Enviar mensajes individuales o grupales dentro de un proyecto, con opción de responder y eliminar mensajes (tanto enviados como recibidos).
+- **Notificaciones**: Notificaciones en tiempo real para nuevos mensajes, tareas asignadas y actualizaciones.
+- **Interfaz Estilizada**: Diseño responsive con Bootstrap y estilos personalizados para una experiencia de usuario agradable.
+- **Autorización y Permisos**: Solo los superusuarios pueden editar o eliminar proyectos. Los miembros pueden gestionar tareas y mensajes.
+
+### Estado actual
+
+- **Entorno de desarrollo**:
+  - Configurado con un entorno virtual (`andre`).
+  - PostgreSQL instalado como base de datos en macOS (usando Homebrew) y Windows.
+  - Base de datos `SystemCom` creada con codificación UTF-8.
+  - Django configurado para usar PostgreSQL.
+- **Repositorio**:
+  - Creado un repositorio Git y subido a GitHub: [https://github.com/Andreas103-SI/AppComunicacion](https://github.com/Andreas103-SI/AppComunicacion).
+  - Archivo `.gitignore` creado para ignorar archivos innecesarios (entorno virtual, archivos de base de datos, etc.).
+- **Aplicación**:
+  - Estructura básica de Django creada, incluyendo la aplicación `TaskFlow`.
+  - Modelos, vistas, URLs y plantillas implementadas para proyectos, tareas, mensajes y notificaciones.
+  - Autenticación y autorización de usuarios configurada.
+  - Bootstrap integrado para el diseño de la interfaz de usuario.
+  - Estilos personalizados añadidos en `static/css/style.css` para los mensajes y otras secciones.
+  - Funcionalidades de mensajería y eliminación de mensajes (enviados y recibidos) implementadas.
+  - Permisos ajustados: solo superusuarios pueden editar o eliminar proyectos.
+
+### Próximos pasos
+
+- Añadir un campo `creador` al modelo `Proyecto` para permitir que el creador del proyecto también pueda editarlo o eliminarlo (no solo superusuarios).
+- Implementar un sistema de búsqueda para proyectos, tareas y mensajes.
+- Añadir filtros avanzados para tareas (por estado, fecha, asignado, etc.).
+- Integrar un sistema de adjuntos para permitir subir archivos en tareas o mensajes.
+- Implementar un sistema de comentarios en tareas con notificaciones asociadas.
+- Mejorar la interfaz de usuario con más opciones de personalización (temas, colores, etc.).
+- Añadir automatización para tareas recurrentes (por ejemplo, notificar si una tarea está próxima a su fecha límite).
+
+## Instrucciones de instalación
+
+Sigue estos pasos para instalar y ejecutar el proyecto localmente:
+
+1. **Clonar el repositorio**:
+   ```bash
+   git clone https://github.com/Andreas103-SI/AppComunicacion.git
+   cd AppComunicacion
+   ```
+
 # AppComunicacion
-SISTEMA DE COMUNICACIÓN DE EMPRESA 
 
-Enunciado del ejercicio
-Desarrolla una aplicación web robusta y completa utilizando Django que permita la gestión de proyectos, tareas, mensajes y la colaboración entre usuarios, con un enfoque en la organización y la comunicación efectiva. La aplicación deberá cumplir con los siguientes requisitos:
+## Descripción
 
-Gestión de proyectos:
+La base de datos `SystemCom` se utiliza para almacenar y gestionar los datos del sistema de comunicación empresarial. Está configurada para funcionar tanto en macOS como en Windows.
 
-Los usuarios administradores podrán crear nuevos proyectos, asignándoles un título, una descripción, una fecha de inicio y una fecha de finalización.
-Los proyectos podrán ser asignados a uno o varios usuarios.
-Gestión de tareas:
+## Configuración
 
-Dentro de cada proyecto, los usuarios administradores podrán crear nuevas tareas, asignándoles un título, una descripción, una fecha límite y un estado (pendiente, en progreso, completada).
-Las tareas podrán ser asignadas a uno o varios usuarios dentro del proyecto.
-Visualización de tareas:
+### macOS (usando Homebrew)
 
-La aplicación mostrará una lista de todas las tareas, ordenadas por fecha límite y proyecto.
-Se podrán filtrar las tareas por estado, usuario asignado y proyecto.
-Modificación y completación de tareas:
+* **Servidor**: PostgreSQL instalado con Homebrew.
+* **Nombre de la base de datos**: `SystemCom`.
+* **Propietario**: `postgres`.
+* **Codificación**: `UTF-8`.
+* **Plantilla**: `template1`.
 
-Los usuarios asignados a una tarea podrán modificar su descripción y marcarla como completada.
-Los usuarios administradores podrán modificar todos los campos de una tarea, incluyendo su estado y los usuarios asignados.
-Mensajes y comentarios:
+### Windows
 
-Los usuarios podrán enviar mensajes a otros usuarios dentro de un proyecto.
-Los usuarios podrán dejar comentarios en las tareas para discutir detalles o proporcionar actualizaciones.
-Gestión de grupos y roles:
+* **Servidor**: PostgreSQL en Windows.
+* **Nombre de la base de datos**: `SystemCom`.
+* **Codificación**: Posible discrepancia entre el código de página de la consola (850) y el código de Windows (1252). Se recomienda usar `UTF-8` (ver instrucciones de instalación).
 
-La aplicación deberá permitir la creación y gestión de grupos.
-Los usuarios podrán ser asignados a uno o varios grupos dentro de un proyecto.
-Se deberán definir roles (administrador, miembro, invitado) con diferentes permisos dentro de cada proyecto.
-Notificaciones:
+## Cómo acceder a la base de datos
 
-La aplicación deberá enviar notificaciones a los usuarios cuando se les asignen tareas, cuando se modifiquen tareas en las que están involucrados, cuando reciban mensajes o cuando haya nuevos comentarios en las tareas.
-Interfaz de usuario:
+### macOS (usando pgAdmin 4)
 
-La aplicación deberá tener una interfaz de usuario intuitiva y bien diseñada. Se recomienda utilizar HTML, CSS y JavaScript para el diseño y la interacción.
-Base de datos:
+1.  Abre pgAdmin 4.
+2.  Conéctate al servidor "PostgreSQL en macOS".
+3.  Expande "Bases de Datos".
+4.  Haz doble clic en `SystemCom`.
 
-Utiliza PostgreSQL como base de datos para almacenar toda la información.
-Modelo de datos:
+### Windows (usando psql)
 
-Define un modelo de datos en Django para representar los proyectos, las tareas, los mensajes, los comentarios, los usuarios y los grupos, incluyendo los campos necesarios y las relaciones entre ellos.
-Vistas, URLs y formularios:
+1.  Abre la consola de Windows (`cmd.exe`).
+2.  Ejecuta:
 
-Crea las vistas, URLs y formularios necesarios en Django para gestionar todas las funcionalidades de la aplicación.
-Autenticación y autorización:
+    ```bash
+    psql -U postgres -d SystemCom
+    ```
 
-Implementa autenticación de usuarios para que cada usuario tenga su propia cuenta y pueda acceder a la aplicación de forma segura.
-Implementa un sistema de autorización basado en roles para controlar el acceso a las diferentes funcionalidades de la aplicación.
-Consideraciones adicionales
-Puedes utilizar librerías de terceros para mejorar la interfaz de usuario, como Bootstrap o Angular o React.
-Asegúrate de validar los datos de entrada de los usuarios para evitar errores y vulnerabilidades de seguridad.
-Implementa pruebas unitarias para asegurar la calidad del código.
-Entrega
-Entrega un documento en formato word con capturas de pantalla comentado paso a paso como se ha desarrollado el programa, y como se distribuye la estructura de directorios, así como lo que se hace en cada uno de los ficheros.
+3.  Ingresa la contraseña del usuario `postgres` cuando se solicite.
 
-Entrega el código fuente de la aplicación Django, en repositorio de git, incluyendo los modelos, vistas, formularios, templates, archivos de configuración y scripts de prueba. Incluye un archivo README con instrucciones detalladas para la instalación y ejecución de la aplicación, así como una descripción de la arquitectura del proyecto y las decisiones de diseño tomadas.
+## Instalación y Configuración del Entorno de Desarrollo
 
-NOTA: no hay que subir los directorios correspondientes al entorno virtual al repositorio git.
+### Crear y activar un entorno virtual
 
-Criterios de evaluación
-Funcionalidad de la aplicación (cumplimiento de los requisitos).
-Calidad del código (legibilidad, organización, comentarios, pruebas unitarias).
-Diseño de la interfaz de usuario (usabilidad, estética).
-Uso de buenas prácticas de desarrollo de Django.
-Correcta implementación de las relaciones entre los modelos de datos.
-Robustez y seguridad de la aplicación.
+```bash
+python -m venv venv
+
+venv\Scripts\activate
+source venv/bin/activate
+```
+
+### Instalar dependencias
+
+Asegúrate de tener un archivo `requirements.txt`. Si no lo tienes, puedes generarlo con:
+
+```bash
+pip freeze > requirements.txt
+```
+
+Instala las dependencias:
+
+```bash
+pip install -r requirements.txt
+```
+
+Nota: Un ejemplo de `requirements.txt` incluiría:
+
+```plaintext
+Django==4.2.20
+psycopg2-binary==2.9.9
+```
+
+### Configurar la base de datos
+
+Asegúrate de tener PostgreSQL instalado y en ejecución.
+
+Crea la base de datos `SystemCom`:
+
+En macOS (usando pgAdmin 4 o terminal):
+
+```bash
+psql -U postgres -c "CREATE DATABASE SystemCom;"
+```
+
+En Windows (usando psql):
+
+```bash
+psql -U postgres -c "CREATE DATABASE SystemCom;"
+```
+
+Configura la base de datos en `proyecto2/settings.py`:
+
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'SystemCom',
+        'USER': 'postgres',
+        'PASSWORD': 'tu_contraseña',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+```
+
+Nota para Windows: Si hay problemas de codificación, asegúrate de que la base de datos use UTF-8. Puedes verificar y corregir la codificación ejecutando:
+
+```bash
+psql -U postgres -d SystemCom -c "SHOW server_encoding;"
+```
+
+Si no es UTF-8, recrea la base de datos con:
+
+```bash
+DROP DATABASE SystemCom;
+CREATE DATABASE SystemCom WITH ENCODING 'UTF8' TEMPLATE template0;
+```
+
+### Ejecutar migraciones
+
+```bash
+python manage.py migrate
+```
+
+### Recolectar archivos estáticos (necesario para los estilos)
+
+```bash
+python manage.py collectstatic
+```
+
+### Crear un superusuario (para acceder como administrador)
+
+```bash
+python manage.py createsuperuser
+```
+
+Sigue las instrucciones para crear un usuario (por ejemplo, Dsierra).
+
+### Ejecutar el servidor de desarrollo
+
+```bash
+python manage.py runserver
+```
+
+Accede a la aplicación en: [http://127.0.0.1:8000/](http://127.0.0.1:8000/).
+
+## Contribución
+
+Haz un fork del repositorio.
+
+Crea una rama para tu funcionalidad:
+
+```bash
+git checkout -b nombre-de-tu-rama
+```
+
+Realiza tus cambios y haz commit:
+
+```bash
+git commit -m "Descripción de tus cambios"
+```
+
+Sube tus cambios a tu fork:
+
+```bash
+git push origin nombre-de-tu-rama
+```
+
+Crea un Pull Request en GitHub.
+
+## Autores
+
+Andrea Sierra - Desarrolladora principal (Andreas103-SI)
+
+## Licencia
+
+Este proyecto está bajo la Licencia MIT (pendiente de definir oficialmente).
+
+## Enlaces
+
+Repositorio: [https://github.com/Andreas103-SI/AppComunicacion](https://github.com/Andreas103-SI/AppComunicacion)
+Documentación: [https://github.com/Andreas103-SI/mkdocs.git](https://github.com/Andreas103-SI/mkdocs.git)
+Estado actual: En Progreso
