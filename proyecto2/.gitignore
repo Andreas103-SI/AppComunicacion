@@ -202,3 +202,49 @@ Thumbs.db # Windows
 __pycache__/
 *.sqlite3
 .env
+# Archivos de Python
+*.pyc
+__pycache__/
+*.py[cod]
+
+# Base de datos local
+*.sqlite3
+db.sqlite3
+db.sqlite3-journal
+
+# Archivos de entorno
+.env
+.venv
+venv/
+andre/
+env/
+ENV/
+env.bak/
+venv.bak/
+andre/
+venv/
+.venv/
+env/
+
+# Archivos de logs
+*.log
+
+# Archivos generados por el sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos estáticos recolectados (no queremos subir staticfiles/)
+staticfiles/
+
+# Archivos de caché de pruebas
+.pytest_cache/
+.coverage
+coverage.xml
+
+# Archivos de documentación y builds
+docs/_build/
+build/
+dist/
+
+# Archivos de intercambio de editores
+*.swp
