@@ -187,21 +187,37 @@ class TareaCreateView(LoginRequiredMixin, CreateView):
         context['proyecto_id'] = self.kwargs.get('proyecto_id')
         return context
 
-class TareaUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
+# Vista para editar una tarea
+class TareaUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Tarea
     form_class = TareaForm
     template_name = 'tareas/tarea_form.html'
 
-    def get_success_url(self):
-        return reverse_lazy('proyecto_detalle', kwargs={'pk': self.object.proyecto.id})
+    def test_func(self):
+        # Solo superusuarios o staff pueden editar tareas
+        return self.request.user.is_superuser or self.request.user.is_staff
 
-class TareaDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['proyecto_id'] = self.object.proyecto.id
+        return context
+
+    def get_success_url(self):
+        messages.success(self.request, "Tarea actualizada correctamente.")
+        return reverse_lazy('tarea_list', kwargs={'proyecto_id': self.object.proyecto.id})
+
+# Vista para eliminar una tarea
+class TareaDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Tarea
     template_name = 'tareas/tarea_confirm_delete.html'
 
-    def get_success_url(self):
-        return reverse_lazy('proyecto_detalle', kwargs={'pk': self.object.proyecto.id})
+    def test_func(self):
+        # Solo superusuarios o staff pueden eliminar tareas
+        return self.request.user.is_superuser or self.request.user.is_staff
 
+    def get_success_url(self):
+        messages.success(self.request, "Tarea eliminada correctamente.")
+        return reverse_lazy('tarea_list', kwargs={'proyecto_id': self.object.proyecto.id})
 
 
 
