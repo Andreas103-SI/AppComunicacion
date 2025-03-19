@@ -286,7 +286,29 @@ class MensajeCreateView(LoginRequiredMixin, CreateView):
                 form.instance.usuario_receptor = None
             elif form.cleaned_data['receptor_type'] == 'user':
                 form.instance.grupo = None
-        return super().form_valid(form)   
+        response = super().form_valid(form)
+
+        # Generar notificaciones
+        mensaje = self.object
+        usuarios_notificados = set()
+
+        if mensaje.usuario_receptor:  # Mensaje individual
+            if mensaje.usuario_receptor != self.request.user:
+                Notificacion.objects.create(
+                    usuario=mensaje.usuario_receptor,
+                    mensaje=f"Nuevo mensaje de {self.request.user.username}: {mensaje.contenido[:50]}..."
+                )
+        elif mensaje.grupo:  # Mensaje grupal
+            for usuario in mensaje.grupo.usuarios.all():
+                if usuario != self.request.user and usuario not in usuarios_notificados:
+                    Notificacion.objects.create(
+                        usuario=usuario,
+                        mensaje=f"Nuevo mensaje en el grupo '{mensaje.grupo.nombre}' por {self.request.user.username}: {mensaje.contenido[:50]}..."
+                    )
+                    usuarios_notificados.add(usuario)
+
+        return response
+
     
 # Vista para responder a un mensaje
 class MensajeReplyCreateView(LoginRequiredMixin, CreateView):
@@ -325,8 +347,28 @@ class MensajeReplyCreateView(LoginRequiredMixin, CreateView):
             else:
                 form.instance.usuario_receptor = mensaje_original.usuario_emisor
                 form.instance.grupo = None
-        return super().form_valid(form)
-    
+        response = super().form_valid(form)
+
+        # Generar notificaciones
+        mensaje = self.object
+        usuarios_notificados = set()
+
+        if mensaje.usuario_receptor:  # Respuesta a un mensaje individual
+            if mensaje.usuario_receptor != self.request.user:
+                Notificacion.objects.create(
+                    usuario=mensaje.usuario_receptor,
+                    mensaje=f"Respuesta a tu mensaje por {self.request.user.username}: {mensaje.contenido[:50]}..."
+                )
+        elif mensaje.grupo:  # Respuesta a un mensaje grupal
+            for usuario in mensaje.grupo.usuarios.all():
+                if usuario != self.request.user and usuario not in usuarios_notificados:
+                    Notificacion.objects.create(
+                        usuario=usuario,
+                        mensaje=f"Nueva respuesta en el grupo '{mensaje.grupo.nombre}' por {self.request.user.username}: {mensaje.contenido[:50]}..."
+                    )
+                    usuarios_notificados.add(usuario)
+
+        return response    
     
 # Vista para eliminar un mensaje                                  
 class MensajeDeleteView(LoginRequiredMixin, View):
@@ -350,7 +392,30 @@ class ComentarioCreateView(LoginRequiredMixin, CreateView):
         tarea = get_object_or_404(Tarea, id=tarea_id)
         form.instance.tarea = tarea
         form.instance.usuario = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+
+        # Generar notificaciones para los usuarios asignados a la tarea
+        usuarios_notificados = set()
+        comentario = self.object
+
+        # Notificar al usuario asignado (asignado_a)
+        if tarea.asignado_a and tarea.asignado_a != self.request.user and tarea.asignado_a not in usuarios_notificados:
+            Notificacion.objects.create(
+                usuario=tarea.asignado_a,
+                mensaje=f"Nuevo comentario en la tarea '{tarea.nombre}' por {self.request.user.username}: {comentario.contenido[:50]}..."
+            )
+            usuarios_notificados.add(tarea.asignado_a)
+
+        # Notificar a los usuarios asignados (usuarios_asignados)
+        for usuario in tarea.usuarios_asignados.all():
+            if usuario != self.request.user and usuario not in usuarios_notificados:
+                Notificacion.objects.create(
+                    usuario=usuario,
+                    mensaje=f"Nuevo comentario en la tarea '{tarea.nombre}' por {self.request.user.username}: {comentario.contenido[:50]}..."
+                )
+                usuarios_notificados.add(usuario)
+
+        return response
 
     def get_success_url(self):
         tarea_id = self.kwargs.get('tarea_id')
@@ -361,47 +426,38 @@ class ComentarioCreateView(LoginRequiredMixin, CreateView):
         tarea_id = self.kwargs.get('tarea_id')
         context['tarea'] = get_object_or_404(Tarea, id=tarea_id)
         return context
-        
+
 #Notificaciones
 
 class NotificacionesView(LoginRequiredMixin, ListView):
     model = Notificacion
-    template_name = 'notificaciones/notificaciones.html'  # Ajusta según tu estructura
+    template_name = 'notificaciones/notificacion_list.html'  # Ajustamos al nombre correcto
     context_object_name = 'notificaciones'
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            queryset = Notificacion.objects.filter(leida=False).order_by('-fecha')
-        else:
-            queryset = Notificacion.objects.filter(
-                usuario=self.request.user,
-                leida=False
-            ).order_by('-fecha')
-        print(f"Notificaciones para {self.request.user}: {queryset}")
-        return queryset
-        
+        # Mostrar todas las notificaciones del usuario logueado, ordenadas por fecha descendente
+        return Notificacion.objects.filter(usuario=self.request.user).order_by('-fecha')        
 
 
 # Marcar notificación como leída
 @login_required
-def marcar_notificacion_leida(request, notificacion_id):
+def marcar_notificacion_leida_no_leida(request, notificacion_id):
+    notificacion = get_object_or_404(Notificacion, id=notificacion_id, usuario=request.user)
     if request.method == 'POST':
-        try:
-            print(f"Intentando marcar notificación {notificacion_id} para el usuario {request.user}")
-            notificacion = get_object_or_404(Notificacion, id=notificacion_id, usuario=request.user)
-            print(f"Notificación encontrada: {notificacion}")
-            notificacion.leida = True
-            notificacion.save()
-            print("Notificación guardada correctamente")
-            messages.success(request, "Notificación marcada como leída.")  # Usa 'messages', no 'mensajes'
-        except Notificacion.DoesNotExist:
-            print(f"Notificación {notificacion_id} no encontrada o no pertenece al usuario {request.user}")
-            messages.error(request, "No tienes permiso para marcar esta notificación o no existe.")  # Usa 'messages'
-        except Exception as e:
-            print(f"Error inesperado: {str(e)}")
-            messages.error(request, f"Error al marcar la notificación: {str(e)}")  # Usa 'messages'
-    return redirect(reverse_lazy('notificaciones'))
+        notificacion.leida = not notificacion.leida  # Alternar entre leída y no leída
+        notificacion.save()
+        estado = "leída" if notificacion.leida else "no leída"
+        messages.success(request, f"Notificación marcada como {estado}.")
+    return redirect('notificaciones')
 
+@login_required
+def eliminar_notificacion(request, notificacion_id):
+    notificacion = get_object_or_404(Notificacion, id=notificacion_id, usuario=request.user)
+    if request.method == 'POST':
+        notificacion.delete()
+        messages.success(request, "Notificación eliminada correctamente.")
+    return redirect('notificaciones')
+    
 # Actualizar estado de tarea
 @login_required
 def tarea_actualizar_estado(request, tarea_id):

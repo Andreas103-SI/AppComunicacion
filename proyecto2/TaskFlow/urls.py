@@ -21,13 +21,17 @@ from .views import (
     # Vistas de Comentarios y Notificaciones
     ComentarioCreateView,
     NotificacionesView,
-    marcar_notificacion_leida,
+    NotificacionesView, 
+    marcar_notificacion_leida_no_leida, 
+    eliminar_notificacion,
 
     # Vistas de Mensajes
     MensajeListView,
     MensajeCreateView,
     MensajeReplyCreateView,
     MensajeDeleteView,
+
+
 )
 
 urlpatterns = [
@@ -65,5 +69,6 @@ urlpatterns = [
 
     # ---------------- NOTIFICACIONES ----------------
     path('notificaciones/', NotificacionesView.as_view(), name='notificaciones'),
-    path('notificaciones/<int:notificacion_id>/marcar-leida/', marcar_notificacion_leida, name='marcar_notificacion_leida'),
+    path('notificaciones/<int:notificacion_id>/marcar_leida/', marcar_notificacion_leida_no_leida, name='marcar_notificacion_leida'),
+    path('notificaciones/<int:notificacion_id>/eliminar/', eliminar_notificacion, name='eliminar_notificacion'),
 ]

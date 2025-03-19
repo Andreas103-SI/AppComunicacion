@@ -2,10 +2,9 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Título destacado -->
-    <h1 class="text-center text-primary display-4 mb-4">Notificaciones</h1>
+    <h1 class="text-center mb-4">Notificaciones</h1>
 
-    <!-- Mensajes de éxito o error -->
+    <!-- Mostrar mensajes de éxito o error -->
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -15,39 +14,44 @@
         {% endfor %}
     {% endif %}
 
-    <!-- Contenedor estilizado para la lista de notificaciones -->
-    <div class="card shadow-lg border-0" style="background-color: #f8f9fa;">
+    <!-- Lista de notificaciones -->
+    <div class="card shadow-lg">
         <div class="card-body">
             {% if notificaciones %}
-                <ul class="list-group list-group-flush">
+                <ul class="list-unstyled">
                     {% for notificacion in notificaciones %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>
-                                {{ notificacion.mensaje }} - 
-                                <small class="text-muted">{{ notificacion.fecha|date:"d/m/Y H:i" }}</small>
-                            </span>
-                            <span>
-                                {% if not notificacion.leida %}
-                                    <form method="post" action="{% url 'marcar_notificacion_leida' notificacion.id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-custom">Marcar como leída</button>
-                                    </form>
-                                {% else %}
-                                    <span class="badge bg-secondary">Leída</span>
-                                {% endif %}
-                            </span>
+                        <li class="border-bottom py-2 d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="{% if not notificacion.leida %}fw-bold{% endif %}">
+                                    {{ notificacion.mensaje }} - {{ notificacion.fecha|date:"d/m/Y H:i" }}
+                                </span>
+                                <span class="text-muted ms-2">
+                                    ({{ notificacion.leida|yesno:"Leída,No leída" }})
+                                </span>
+                            </div>
+                            <div class="btn-group">
+                                <form method="post" action="{% url 'marcar_notificacion_leida' notificacion.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm {% if notificacion.leida %}btn-warning{% else %}btn-success{% endif %}">
+                                        {% if notificacion.leida %}Marcar como no leída{% else %}Marcar como leída{% endif %}
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'eliminar_notificacion' notificacion.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta notificación?')">Eliminar</button>
+                                </form>
+                            </div>
                         </li>
                     {% endfor %}
                 </ul>
             {% else %}
-                <p class="text-center text-muted mb-0">No tienes notificaciones.</p>
+                <p class="text-center text-muted">No tienes notificaciones.</p>
             {% endif %}
         </div>
     </div>
 
-    <!-- Botón de regreso -->
     <div class="text-center mt-4">
-        <a href="{% url 'home' %}" class="btn btn-custom px-4">Volver al Inicio</a>
-    </div>   
+        <a href="{% url 'home' %}" class="btn btn-secondary">Volver al Inicio</a>
+    </div>
 </div>
 {% endblock %}
