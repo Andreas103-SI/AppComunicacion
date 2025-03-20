@@ -183,7 +183,7 @@ python manage.py migrate
 
 
 ## Diagrama DER
-![DER](DER.png)
+![DER](./DER.png)
 
 
 
@@ -238,7 +238,7 @@ Crea un Pull Request en GitHub.
 Andrea Sierra - Desarrolladora principal (Andreas103-SI)
 
 ## Vista del Proyecto
-![Otra Imagen](image1.png)
+![Imagen](./image1.png)
 
 ## Licencia
 
