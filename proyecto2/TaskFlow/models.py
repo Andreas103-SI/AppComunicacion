@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser
 import datetime
 
 
-    
+# Modelo Usuario   
 class Usuario(AbstractUser):
     ROLES = (
         ('admin', 'Administrador'),
@@ -16,7 +16,7 @@ class Usuario(AbstractUser):
     def __str__(self):
         return self.username
 
-        
+# Modelo Rol       
 class Rol(models.Model):
     nombre = models.CharField(max_length=50, unique=True)
     descripcion = models.TextField(blank=True, null=True)
@@ -24,6 +24,8 @@ class Rol(models.Model):
     def __str__(self):
         return self.nombre
 
+
+# Modelo Proyecto
 class Proyecto(models.Model):
     ESTADOS = (
         ('activo', 'Activo'),
@@ -40,6 +42,8 @@ class Proyecto(models.Model):
     
     def __str__(self):
         return self.nombre
+
+# Modelo Tarea
 
 class Tarea(models.Model):
     ESTADOS = (
@@ -58,7 +62,8 @@ class Tarea(models.Model):
 
     def __str__(self):
         return self.nombre
-        
+
+# Modelo Grupo       
 class Grupo(models.Model):
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True, null=True)
@@ -74,6 +79,7 @@ class Grupo(models.Model):
     def __str__(self):
         return self.nombre
 
+# Modelo Mensaje
 class Mensaje(models.Model):
     contenido = models.TextField()
     fecha_envio = models.DateTimeField(auto_now_add=True)
@@ -119,6 +125,8 @@ class Comentario(models.Model):
     def __str__(self):
         return f"Comentario de {self.usuario} en {self.tarea}"
 
+
+# Modelo Notificacion
 class Notificacion(models.Model):
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
