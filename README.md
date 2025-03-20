@@ -178,8 +178,12 @@ CREATE DATABASE SystemCom WITH ENCODING 'UTF8' TEMPLATE template0;
 python manage.py migrate
 ```
 
-![Diagrama DER](./DER.png)
-![imagen del Proyecto](./image1.png)
+
+
+
+
+## Diagrama DER
+![DER](DER.png)
 
 
 
@@ -232,6 +236,9 @@ Crea un Pull Request en GitHub.
 ## Autores
 
 Andrea Sierra - Desarrolladora principal (Andreas103-SI)
+
+## Vista del Proyecto
+![Otra Imagen](image1.png)
 
 ## Licencia
 
