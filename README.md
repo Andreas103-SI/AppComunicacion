@@ -178,6 +178,11 @@ CREATE DATABASE SystemCom WITH ENCODING 'UTF8' TEMPLATE template0;
 python manage.py migrate
 ```
 
+![Diagrama DER](./DER.png)
+![imagen del Proyecto](./image1.png)
+
+
+
 ### Recolectar archivos estáticos (necesario para los estilos)
 
 ```bash
